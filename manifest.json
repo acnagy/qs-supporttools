@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+
+  "name": "QuickSchools Trial Finder",
+  "description": "Scrape Control Reports and Zopim for a list of trial users currently online.",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "permissions": []
+}
