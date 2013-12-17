@@ -25,6 +25,9 @@ chrome.pageAction.onClicked.addListener(function(tab) {
 	if (dashboardOrControl(tab) == "control") {
 		parseSchoolcodes(tab);	
 	} else if (dashboardOrControl(tab) == "dashboard") {
+		if (tab.url.indexOf('page_url') < 0) {
+			alert('To view all of the online trials, go to the visitor list and then use then select "Group by Page URL" in the upper left.')
+		}
 		parseZopim(tab);
 	}
 });
@@ -43,9 +46,26 @@ function parseZopim(tab) {
 			}
 		}
 		
+		// alert user
 		chrome.storage.sync.get("QSSchoolCodes", function(response) {
-			alert(response.QSSchoolCodes.match(urls.getUnique()));
-		})
+			var alertText = '';
+			var schoolCodes = response.QSSchoolCodes;
+			if (schoolCodes.length === undefined || schoolCodes.length === 0) {
+				alertText = "There are no trial schools on file. Go to Control --> Reports --> Customer Outreach and click on the QuickSchools icon to save all of the trial schools to match here :)"; 
+			}
+			var onlineSchools = response.QSSchoolCodes.match(urls.getUnique());
+			if (onlineSchools.length === 0) alertText = 'There are no trial schools online right now'
+			else {
+				var s = 's';
+				if (onlineSchools.length === 1) s = '';
+				alertText = 'There are ' + onlineSchools.length + s + 'with users online right now:'
+				for (var i = 0; i !== onlineSchools.length; i++) {
+					alertText += '\n' + onlineSchools[i];
+				}
+				alertText += '\nYou should be able to find the online trial users by searching by these schoolcodes!'
+			}
+			alert(alertText);
+		});
 	});
 }
 
@@ -64,7 +84,7 @@ function checkForValidUrl(tabId, changeInfo, tab) {
 function dashboardOrControl(tab) {
 	if (tab.url.indexOf('Customer%20Outreach') > -1) {
 		return "control"
-	} else if (tab.url.indexOf('dashboard.zopim.com') > -1) {
+	} else if (tab.url.indexOf('dashboard.zopim.com/#Visitor_List/page_url') > -1) {
 		return "dashboard"
 	} else return "";
 }
@@ -97,7 +117,7 @@ function parseSchoolcodes(tab) {
 
 function saveSchoolCodes(schoolCodes) {
 	chrome.storage.sync.set({'QSSchoolCodes' : schoolCodes}, function() {
-		alert('Schoolcodes saved. You can now search Zopim for any schoolcode on this report.')
+		alert('Schoolcodes saved. Now go to the Zopim dashboard --> Visitor List, click the "Group by Page URL" button in the upper right, and click the QuickSchools icon in the URL bar to view all of the online trials.')
 	});
 }
 
