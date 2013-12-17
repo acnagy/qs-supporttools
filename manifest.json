@@ -1,13 +1,24 @@
 {
-  "manifest_version": 2,
-
-  "name": "QuickSchools Trial Finder",
-  "description": "Scrape Control Reports and Zopim for a list of trial users currently online.",
-  "version": "1.0",
-
-  "browser_action": {
-    "default_icon": "icon.png",
-    "default_popup": "popup.html"
+  "name": "Animated Page Action",
+  "description": "This extension adds an animated browser action to the toolbar.",
+  "version": "1.2",
+  "background": {
+    "scripts": ["background.js"]
   },
-  "permissions": []
+  "page_action": {
+    "default_title": "QuickSchools Trial Finder",
+	"default_icon": "icon.png"
+  },
+  "manifest_version": 2,
+  "permissions" : [
+	  "tabs"
+  ],
+  "content_scripts" : [
+	  {
+		  "matches" : [
+			  "http://*.quickschools.com/*"
+		  ],
+		  "js" : ["contentscript.js"],
+	  }
+  ]
 }
