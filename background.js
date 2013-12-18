@@ -58,7 +58,7 @@ function parseZopim(tab) {
 				var onlineSchools = response.QSSchoolCodes.match(urls.getUnique());
 				if (onlineSchools.length === 0) alertText = 'There are no trial schools online right now'
 				else {
-					if (onlineSchools.length === 1) alertText = 'There is one school with users online right now:\n';
+					if (onlineSchools.length === 1) alertText = 'There is one trial school with users online right now:\n';
 					else alertText = 'There are ' + onlineSchools.length + ' schools with users online right now:\n'
 					for (var i = 0; i !== onlineSchools.length; i++) {
 						alertText += '\n' + onlineSchools[i];
@@ -119,7 +119,7 @@ function parseSchoolcodes(tab) {
 
 function saveSchoolCodes(schoolCodes) {
 	chrome.storage.sync.set({'QSSchoolCodes' : schoolCodes}, function() {
-		alert('Schoolcodes saved.\nNow go to the Zopim dashboard --> Visitor List, click the "Group by Page URL" button in the upper right, and click the QuickSchools icon in the URL bar to view all of the online trials.')
+		alert(schoolCodes.length.toString() + ' trial schools found and saved.\nNow go to the Zopim dashboard --> Visitor List, click the "Group by Page URL" button in the upper right, and click the QuickSchools icon in the URL bar to view all of the online trials.')
 	});
 }
 
