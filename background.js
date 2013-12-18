@@ -63,7 +63,7 @@ function parseZopim(tab) {
 					for (var i = 0; i !== onlineSchools.length; i++) {
 						alertText += '\n' + onlineSchools[i];
 					}
-					alertText += '\n\nYou should be able to find the online trial users by searching by these schoolcodes!'
+					alertText += '\n\nBe sure to refresh the trial school list every few days by clicking on the QS icon from the Customer Outreach reports.'
 				}
 				alert(alertText);
 			}
