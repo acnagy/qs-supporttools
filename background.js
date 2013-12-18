@@ -56,13 +56,12 @@ function parseZopim(tab) {
 			var onlineSchools = response.QSSchoolCodes.match(urls.getUnique());
 			if (onlineSchools.length === 0) alertText = 'There are no trial schools online right now'
 			else {
-				var s = 's';
-				if (onlineSchools.length === 1) s = '';
-				alertText = 'There are ' + onlineSchools.length + s + 'with users online right now:'
+				if (onlineSchools.length === 1) 'There is one school with users online right now:';
+				else alertText = 'There are ' + onlineSchools.length + ' schools with users online right now:\n'
 				for (var i = 0; i !== onlineSchools.length; i++) {
 					alertText += '\n' + onlineSchools[i];
 				}
-				alertText += '\nYou should be able to find the online trial users by searching by these schoolcodes!'
+				alertText += '\n\nYou should be able to find the online trial users by searching by these schoolcodes!'
 			}
 			alert(alertText);
 		});
@@ -84,7 +83,7 @@ function checkForValidUrl(tabId, changeInfo, tab) {
 function dashboardOrControl(tab) {
 	if (tab.url.indexOf('Customer%20Outreach') > -1) {
 		return "control"
-	} else if (tab.url.indexOf('dashboard.zopim.com/#Visitor_List/page_url') > -1) {
+	} else if (tab.url.indexOf('dashboard.zopim.com') > -1) {
 		return "dashboard"
 	} else return "";
 }
@@ -117,7 +116,7 @@ function parseSchoolcodes(tab) {
 
 function saveSchoolCodes(schoolCodes) {
 	chrome.storage.sync.set({'QSSchoolCodes' : schoolCodes}, function() {
-		alert('Schoolcodes saved. Now go to the Zopim dashboard --> Visitor List, click the "Group by Page URL" button in the upper right, and click the QuickSchools icon in the URL bar to view all of the online trials.')
+		alert('Schoolcodes saved.\nNow go to the Zopim dashboard --> Visitor List, click the "Group by Page URL" button in the upper right, and click the QuickSchools icon in the URL bar to view all of the online trials.')
 	});
 }
 
