@@ -1,7 +1,8 @@
 {
-  "name": "Animated Page Action",
-  "description": "This extension adds an animated browser action to the toolbar.",
-  "version": "1.2",
+  "name": "QuickSchools Trial Finder",
+  "description": "Parse the Zopim Dashboard and the Customer Outreach reports on Control to find users online from trial schools.",
+  "version": "1.0",
+  "icons" : {"128" : "icon.png"},
   "background": {
     "scripts": ["background.js"]
   },

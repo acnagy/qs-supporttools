@@ -22,19 +22,21 @@ Array.prototype.match = function(toMatch) {
 // Called when the user clicks on the page action.
 chrome.pageAction.onClicked.addListener(function(tab) {
 	var title = chrome.pageAction.getTitle({'tabId' : tab.id}, function(){});
-	if (dashboardOrControl(tab) == "control") {
-		parseSchoolcodes(tab);	
-	} else if (dashboardOrControl(tab) == "dashboard") {
-		if (tab.url.indexOf('page_url') < 0) {
-			alert('To view all of the online trials, go to the visitor list and then use then select "Group by Page URL" in the upper left.')
-		}
-		parseZopim(tab);
-	}
+	if (dashboardOrControl(tab) == "control") parseSchoolcodes(tab);	
+	else if (dashboardOrControl(tab) == "dashboard") parseZopim(tab);
 });
 
 function parseZopim(tab) {
 	chrome.tabs.sendRequest(tab.id, {method: "getText"}, function(response) {
+		if (response.data.indexOf('Group by Page URL') < 0) {
+			alert("Couldn't parse the page. " + 'Be sure to go to the Visitor List and select "Group By Page URL".');
+			return;
+		}
+		
 		var lines = response.data.split('\n');
+		
+		if (lines)
+		
 		var urls = [];
 
 		for (var i = 0; i < lines.length; i++) {
@@ -44,7 +46,7 @@ function parseZopim(tab) {
 				var end = lines[i].indexOf('.quickschools');
 				urls.push(lines[i].substring(start, end));
 			}
-		}
+		}		
 		
 		// alert user
 		chrome.storage.sync.get("QSSchoolCodes", function(response) {
@@ -52,18 +54,19 @@ function parseZopim(tab) {
 			var schoolCodes = response.QSSchoolCodes;
 			if (schoolCodes.length === undefined || schoolCodes.length === 0) {
 				alertText = "There are no trial schools on file. Go to Control --> Reports --> Customer Outreach and click on the QuickSchools icon to save all of the trial schools to match here :)"; 
-			}
-			var onlineSchools = response.QSSchoolCodes.match(urls.getUnique());
-			if (onlineSchools.length === 0) alertText = 'There are no trial schools online right now'
-			else {
-				if (onlineSchools.length === 1) 'There is one school with users online right now:';
-				else alertText = 'There are ' + onlineSchools.length + ' schools with users online right now:\n'
-				for (var i = 0; i !== onlineSchools.length; i++) {
-					alertText += '\n' + onlineSchools[i];
+			} else {
+				var onlineSchools = response.QSSchoolCodes.match(urls.getUnique());
+				if (onlineSchools.length === 0) alertText = 'There are no trial schools online right now'
+				else {
+					if (onlineSchools.length === 1) alertText = 'There is one school with users online right now:\n';
+					else alertText = 'There are ' + onlineSchools.length + ' schools with users online right now:\n'
+					for (var i = 0; i !== onlineSchools.length; i++) {
+						alertText += '\n' + onlineSchools[i];
+					}
+					alertText += '\n\nYou should be able to find the online trial users by searching by these schoolcodes!'
 				}
-				alertText += '\n\nYou should be able to find the online trial users by searching by these schoolcodes!'
+				alert(alertText);
 			}
-			alert(alertText);
 		});
 	});
 }
