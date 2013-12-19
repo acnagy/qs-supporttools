@@ -26,10 +26,17 @@ chrome.pageAction.onClicked.addListener(function(tab) {
 	else if (dashboardOrControl(tab) == "dashboard") parseZopim(tab);
 });
 
+function switchToPageURL(tab) {
+	chrome.tabs.update(tab.id, {'url' : 'https://dashboard.zopim.com/#Visitor_List/page_url'}, function() {
+		parseZopim(tab);	
+	});
+}
+
 function parseZopim(tab) {
 	chrome.tabs.sendRequest(tab.id, {method: "getText"}, function(response) {
 		if (response.data.indexOf('Group by Page URL') < 0) {
-			alert("Couldn't parse the page. " + 'Be sure to go to the Visitor List and select "Group By Page URL".');
+			if (confirm("The script needs to run on the Visitor List, grouped by Page URL. Would you like to switch to that view now?"));
+				switchToPageURL(tab);
 			return;
 		}
 		
@@ -38,7 +45,6 @@ function parseZopim(tab) {
 		if (lines)
 		
 		var urls = [];
-
 		for (var i = 0; i < lines.length; i++) {
 			// is a url line
 			if (lines[i].indexOf('http') !== -1) {
@@ -46,8 +52,8 @@ function parseZopim(tab) {
 				var end = lines[i].indexOf('.quickschools');
 				urls.push(lines[i].substring(start, end));
 			}
-		}		
-		
+		}
+
 		// alert user
 		chrome.storage.sync.get("QSSchoolCodes", function(response) {
 			var alertText = '';
@@ -55,7 +61,8 @@ function parseZopim(tab) {
 			if (schoolCodes.length === undefined || schoolCodes.length === 0) {
 				alertText = "There are no trial schools on file. Go to Control --> Reports --> Customer Outreach and click on the QuickSchools icon to save all of the trial schools to match here :)"; 
 			} else {
-				var onlineSchools = response.QSSchoolCodes.match(urls.getUnique());
+				var onlineSchools = urls.getUnique().match(response.QSSchoolCodes);
+				var prospectSchols = urls.match(['www']);
 				if (onlineSchools.length === 0) alertText = 'There are no trial schools online right now'
 				else {
 					if (onlineSchools.length === 1) alertText = 'There is one trial school with users online right now:\n';
@@ -63,8 +70,17 @@ function parseZopim(tab) {
 					for (var i = 0; i !== onlineSchools.length; i++) {
 						alertText += '\n' + onlineSchools[i];
 					}
-					alertText += '\n\nBe sure to refresh the trial school list every few days by clicking on the QS icon from the Customer Outreach reports.'
+					
 				}
+				
+				if (prospectSchols.length !== 0) {
+					if (prospectSchols.length === 1) {
+						 alertText += '\n\nThere is also a user';
+					} else alertText += '\n\nThere are also ' + prospectSchols.length + ' prospect users';
+					alertText +=  ' on the QuickSchools homepage (www.quickschools.com/*).';
+				}
+				
+				alertText += '\n\nBe sure to refresh the trial school list daily by clicking on the QS icon from the Customer Outreach reports.'
 				alert(alertText);
 			}
 		});
@@ -119,7 +135,7 @@ function parseSchoolcodes(tab) {
 
 function saveSchoolCodes(schoolCodes) {
 	chrome.storage.sync.set({'QSSchoolCodes' : schoolCodes}, function() {
-		alert(schoolCodes.length.toString() + ' trial schools found and saved.\nNow go to the Zopim dashboard --> Visitor List, click the "Group by Page URL" button in the upper right, and click the QuickSchools icon in the URL bar to view all of the online trials.')
+		alert(schoolCodes.length.toString() + ' trial schools found and saved.\n\nNow go to the Zopim dashboard --> Visitor List, click the "Group by Page URL" button in the upper right, and click the QuickSchools icon in the URL bar to view all of the online trials.')
 	});
 }
 

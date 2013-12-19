@@ -1,13 +1,13 @@
 {
-  "name": "QuickSchools Trial Finder",
-  "description": "Parse the Zopim Dashboard and the Customer Outreach reports on Control to find users online from trial schools.",
-  "version": "1.0",
+  "name": "QuickSchools Prospect Finder",
+  "description": "Parse the Zopim Dashboard and the Customer Outreach reports on Control to find potential sales prospects to engage via chat.",
+  "version": "1.1",
   "icons" : {"128" : "icon.png"},
   "background": {
     "scripts": ["background.js"]
   },
   "page_action": {
-    "default_title": "QuickSchools Trial Finder",
+    "default_title": "QuickSchools Prospect School Finder",
 	"default_icon": "icon.png"
   },
   "manifest_version": 2,
