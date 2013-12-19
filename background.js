@@ -74,12 +74,13 @@ function parseZopim(tab) {
 				}
 				
 				if (prospectSchols.length !== 0) {
-					if (prospectSchols.length === 1) {
-						 alertText += '\n\nThere is also a user';
-					} else alertText += '\n\nThere are also ' + prospectSchols.length + ' prospect users';
-					alertText +=  ' on the QuickSchools homepage (www.quickschools.com/*).';
+					if (prospectSchols.length === 1) alertText += '\n\nThere is also a prospect user';
+					else alertText += '\n\nThere are also ' + prospectSchols.length + ' prospect users';
+				} else {
+					alertText += 'There are no prospect users';
 				}
 				
+				alertText +=  ' on the QuickSchools homepage (www.quickschools.com/*).';
 				alertText += '\n\nBe sure to refresh the trial school list daily by clicking on the QS icon from the Customer Outreach reports.'
 				alert(alertText);
 			}
