@@ -77,7 +77,7 @@ function parseZopim(tab) {
 					if (prospectSchols.length === 1) alertText += '\n\nThere is also a prospect user';
 					else alertText += '\n\nThere are also ' + prospectSchols.length + ' prospect users';
 				} else {
-					alertText += 'There are no prospect users';
+					alertText += '\n\nThere are no prospect users';
 				}
 				
 				alertText +=  ' on the QuickSchools homepage (www.quickschools.com/*).';
