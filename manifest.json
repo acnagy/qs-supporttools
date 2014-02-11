@@ -9,7 +9,7 @@
         "description": "Answer Zopim Chat"
       }
   },
-  "description": "Find prospect sales users on Zopim with an omnibar button and answer chats with cntl/cmd-shift-a",
+  "description": "Find prospect sales users on Zopim with an omnibar button and answer chats with Control/Command-Shift-A",
   "version": "1.1",
   "icons" : {"128" : "icon.png"},
   "background": {

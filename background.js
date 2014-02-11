@@ -56,10 +56,16 @@ function parseZopim(tab) {
 
 		// alert user
 		chrome.storage.sync.get("QSSchoolCodes", function(response) {
+			// will throw lastError if QSSchoolCodes key doesn't exist
+			if (chrome.runtime.lastError) {
+				alert("Please go to Control and run this script on a CSO report before looking for prospect schools on Zopim.");
+				return;
+			}
+			
 			var alertText = '';
 			var schoolCodes = response.QSSchoolCodes;
-			if (schoolCodes.length === undefined || schoolCodes.length === 0) {
-				alertText = "There are no trial schools on file. Go to Control --> Reports --> Customer Outreach and click on the QuickSchools icon to save all of the trial schools to match here :)"; 
+			if (typeof schoolCodes === 'undefined' || schoolCodes.length === 0) {
+				alertText = "There are no trial schools on file. Go to Control --> Reports --> Customer Outreach and click on the QuickSchools icon to save all of the trial schools to match here."; 
 			} else {
 				var onlineSchools = urls.getUnique().match(response.QSSchoolCodes);
 				var prospectSchols = urls.match(['www']);
@@ -82,8 +88,8 @@ function parseZopim(tab) {
 				
 				alertText +=  ' on the QuickSchools homepage (www.quickschools.com/*).';
 				alertText += '\n\nBe sure to refresh the trial school list daily by clicking on the QS icon from the Customer Outreach reports.'
-				alert(alertText);
 			}
+			alert(alertText);
 		});
 	});
 }
