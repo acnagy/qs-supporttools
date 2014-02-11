@@ -1,13 +1,22 @@
 {
-  "name": "QuickSchools Prospect Finder",
-  "description": "Parse the Zopim Dashboard and the Customer Outreach reports on Control to find potential sales prospects to engage via chat.",
+  "name": "QuickSchools Support Tools",
+  
+  "commands": {
+      "answerChat": {
+        "suggested_key": {
+          "default": "Ctrl+Shift+A"
+        },
+        "description": "Answer Zopim Chat"
+      }
+  },
+  "description": "Find prospect sales users on Zopim with an omnibar button and answer chats with cntl/cmd-shift-a",
   "version": "1.1",
   "icons" : {"128" : "icon.png"},
   "background": {
     "scripts": ["background.js"]
   },
   "page_action": {
-    "default_title": "QuickSchools Prospect School Finder",
+    "default_title": "QuickSchools Support Tools",
 	"default_icon": "icon.png"
   },
   "manifest_version": 2,

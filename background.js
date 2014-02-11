@@ -33,7 +33,7 @@ function switchToPageURL(tab) {
 }
 
 function parseZopim(tab) {
-	chrome.tabs.sendRequest(tab.id, {method: "getText"}, function(response) {
+	chrome.tabs.sendMessage(tab.id, {method: "getText"}, function(response) {
 		if (response.data.indexOf('Group by Page URL') < 0) {
 			if (confirm("The script needs to run on the Visitor List, grouped by Page URL. Would you like to switch to that view now?"));
 				switchToPageURL(tab);
@@ -112,7 +112,7 @@ function dashboardOrControl(tab) {
 chrome.tabs.onUpdated.addListener(checkForValidUrl);
 
 function parseSchoolcodes(tab) {
-	chrome.tabs.sendRequest(tab.id, {method: "getText"}, function(response) {
+	chrome.tabs.sendMessage(tab.id, {method: "getText"}, function(response) {
 		if (response.method=="getText") {
 			var text = response.data;
 			var rows = text.split('\n');
@@ -158,3 +158,22 @@ function containsNumbers(candidate) {
 	var matches = candidate.match(/\d+/g);
 	return (matches != null);
 }
+
+
+
+// =======================================
+// = Switch to Dashboard and answer chat =
+// =======================================
+chrome.commands.onCommand.addListener(function(command) {
+	chrome.tabs.query({url:'https://dashboard.zopim.com/*'}, function(tabs) {
+		var tabId = tabs[0].id
+		var windowId = tabs[0].windowId
+		if (tabs.length < 1) {
+			alert("Zopim dashboard isn't open.")
+		} else {
+			chrome.tabs.sendMessage(tabId, {method: command});
+			chrome.tabs.update(tabId, {active: true});
+			chrome.windows.update(windowId, {focused: true});
+		}
+	});
+});
