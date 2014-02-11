@@ -1,36 +1,41 @@
 {
-  "name": "QuickSchools Support Tools",
-  
-  "commands": {
-      "answerChat": {
-        "suggested_key": {
-          "default": "Ctrl+Shift+A"
-        },
-        "description": "Answer Zopim Chat"
-      }
-  },
-  "description": "Find prospect sales users on Zopim with an omnibar button and answer chats with Control/Command-Shift-A",
-  "version": "1.1",
-  "icons" : {"128" : "icon.png"},
-  "background": {
-    "scripts": ["background.js"]
-  },
-  "page_action": {
-    "default_title": "QuickSchools Support Tools",
-	"default_icon": "icon.png"
-  },
-  "manifest_version": 2,
-  "permissions" : [
-	  "tabs",
-	  "storage"
-  ],
-  "content_scripts" : [
-	  {
-	      "matches" : [
-	        "http://*/*",
-	        "https://*/*"
-	      ],
-		  "js" : ["contentscript.js"]
-	  }
-  ]
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
+    "commands": {
+        "answerChat": {
+            "description": "Answer Zopim Chat",
+            "suggested_key": {
+                "default": "Ctrl+Shift+A"
+            }
+        }
+    },
+    "content_scripts": [
+        {
+            "js": [
+                "contentscript.js"
+            ],
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ]
+        }
+    ],
+    "description": "Find prospect sales users on Zopim with an omnibar button and answer chats with Control/Command-Shift-A.",
+    "icons": {
+        "128": "icon.png"
+    },
+    "manifest_version": 2,
+    "name": "QuickSchools Support Tools",
+    "page_action": {
+        "default_icon": "icon.png",
+        "default_title": "QuickSchools Support Tools"
+    },
+    "permissions": [
+        "tabs",
+        "storage"
+    ],
+    "version": "1.2"
 }
