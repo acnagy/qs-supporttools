@@ -1,4 +1,4 @@
-qs-trialfinder
+Quickschools Support Tools
 ==============
 
-Chrome Extension to scrape Control Reports and Zopim for a list of trial users currently online.
+Find prospect sales users on Zopim with an omnibar button and answer chats with Control/Command-Shift-A.
