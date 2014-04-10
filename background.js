@@ -202,7 +202,11 @@ function notifyCopiedTicketNumber(ticketNumber) {
         message: ticketNumber,
         iconUrl: "icon.png"
     }
-    chrome.notifications.create('', opt, function(){});
+    chrome.notifications.create('', opt, function(notificationId){
+        setTimeout(function() {
+            chrome.notifications.clear(notificationId, function(){});
+        }, 1000 * 5);
+    });
 }
 
 function copyToClipboard( text ){
