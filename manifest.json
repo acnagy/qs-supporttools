@@ -10,12 +10,19 @@
             "suggested_key": {
                 "default": "Ctrl+Shift+A"
             }
+        },
+        "copyTicketNumber": {
+            "description": "Copy Zendesk ticket number",
+            "suggested_key": {
+                "default": "Alt+T"
+            }
         }
     },
     "content_scripts": [
         {
             "js": [
-                "contentscript.js"
+                "contentscript.js",
+                "jqeury.min.js"
             ],
             "matches": [
                 "http://*/*",
@@ -35,7 +42,9 @@
     },
     "permissions": [
         "tabs",
-        "storage"
+        "storage",
+        "notifications",
+        "clipboardWrite"
     ],
     "version": "1.2"
 }

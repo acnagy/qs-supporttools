@@ -17,7 +17,8 @@ Array.prototype.match = function(toMatch) {
 		if (toMatch.indexOf(this[i]) > -1) matchedArray.push(this[i]);
 	}
 	return matchedArray;
-}
+} 
+
 
 // Called when the user clicks on the page action.
 chrome.pageAction.onClicked.addListener(function(tab) {
@@ -119,7 +120,7 @@ chrome.tabs.onUpdated.addListener(checkForValidUrl);
 
 function parseSchoolcodes(tab) {
 	chrome.tabs.sendMessage(tab.id, {method: "getText"}, function(response) {
-		if (response.method=="getText") {
+		if (response.method === "getText") {
 			var text = response.data;
 			var rows = text.split('\n');
 			var codes = [];
@@ -171,15 +172,47 @@ function containsNumbers(candidate) {
 // = Switch to Dashboard and answer chat =
 // =======================================
 chrome.commands.onCommand.addListener(function(command) {
-	chrome.tabs.query({url:'https://dashboard.zopim.com/*'}, function(tabs) {
-		var tabId = tabs[0].id
-		var windowId = tabs[0].windowId
-		if (tabs.length < 1) {
-			alert("Zopim dashboard isn't open.")
-		} else {
-			chrome.tabs.sendMessage(tabId, {method: command});
-			chrome.tabs.update(tabId, {active: true});
-			chrome.windows.update(windowId, {focused: true});
-		}
-	});
+    if (command === "answerChat") {
+    	chrome.tabs.query({url:'https://dashboard.zopim.com/*'}, function(tabs) {
+    		var tabId = tabs[0].id
+    		var windowId = tabs[0].windowId
+    		if (tabs.length < 1) {
+    			alert("Zopim dashboard isn't open.")
+    		} else {
+    			chrome.tabs.sendMessage(tabId, {method: command});
+    			chrome.tabs.update(tabId, {active: true});
+    			chrome.windows.update(windowId, {focused: true});
+    		}
+    	});
+    } else if (command === "copyTicketNumber") {
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            chrome.tabs.sendMessage(tabs[0]['id'], {method: command}, function(response) {
+                console.log(response);
+                copyToClipboard(response.ticketNumber);
+                notifyCopiedTicketNumber(response.ticketNumber);
+            });
+        });
+    }
 });
+
+function notifyCopiedTicketNumber(ticketNumber) {
+    var opt = {
+        type: "basic",
+        title: "Copied ticket number",
+        message: ticketNumber,
+        iconUrl: "icon.png"
+    }
+    chrome.notifications.create('', opt, function(){});
+}
+
+function copyToClipboard( text ){
+    var copyDiv = document.createElement('div');
+    copyDiv.contentEditable = true;
+    document.body.appendChild(copyDiv);
+    copyDiv.innerHTML = text;
+    copyDiv.unselectable = "off";
+    copyDiv.focus();
+    document.execCommand('SelectAll');
+    document.execCommand("Copy", false, null);
+    document.body.removeChild(copyDiv);
+}
