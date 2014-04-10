@@ -1,25 +1,55 @@
 // qs-supporttools
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.method === "answerChat") {
-		$( ".meshim_dashboard_components_chatBar_ServeRequestButton" ).click();
+		$( ".meshim_dashboard_components_chatBar_ServeRequestButton" ).first().click()
 	} else if (message.method === "getText") {
 		sendResponse({data: document.documentElement.innerText, method:"getText"});
 	} else if (message.method === "copyTicketNumber") {
-        sendResponse({ticketNumber: getTicketNumber()});
+        sendResponse(getTicketNumber());
 	}
 });
 
 function getTicketNumber() {
-    ticket = ticketFromUrl();
+    var type = "none";
+    var ticket = "";
+    
+    var zdTicket = getZendeskTicket();
+    var assemblaTicket = getAssemblaTicket();
+    
+    if (zdTicket !== "") {
+        type = "zendesk";
+        ticket = zdTicket;
+    } else if (assemblaTicket !== "") {
+        type = "assembla";
+        ticket = assemblaTicket;
+    }
+    return {type:type, ticketNumber:'#' + ticket};
+}
+
+function getZendeskTicket() {
+    var ticket = ticketFromUrl();
     if (ticket === "") ticket = ticketFromNotice();
     if (ticket === "") ticket = ticketFromHighlighted();
     if (ticket === "") ticket = ticketFromHighlightedFrame();
-    return ticket !== "" ? "#" + ticket : "No ticket selected."
-    
+    return ticket;
+}
+
+function getAssemblaTicket() {
+    var url = document.URL;
+    if (url.indexOf("assembla") > -1 && url.indexOf('tickets') > -1) {
+        var lastPath = url.split('/');
+        lastPath = lastPath[lastPath.indexOf('tickets') + 1];
+        poundIndex = lastPath.indexOf("#");
+        if (poundIndex > -1) {
+            lastPath = lastPath.substring(0, poundIndex);
+        }
+        return lastPath;
+    }
+    return "";
 }
 
 function ticketFromUrl() {
-    url = document.URL;
+    var url = document.URL;
     if (url.indexOf('zendesk') > -1 && url.indexOf('tickets') > -1) {
         urlArray = url.split('/');
         ticketNum = urlArray[urlArray.length - 1];
@@ -46,7 +76,7 @@ function ticketFromHighlightedFrame() {
 function ticketFromNotice() {
     var notice = $('#notice').first();
     if (notice.length !== 0) {
-    	return notice.text().substring(8, 14);
+    	return numbersFromTicketString(notice.text());
     }
     return "";
 }
@@ -56,7 +86,12 @@ function ticketFromHighlighted() {
     if (tooltipId !== undefined){
         var ticketText = $('#'+tooltipId + ' * .title').text();
         var ticketNumber = ticketText.substring(ticketText.indexOf('#') + 1);
-        return ticketNumber.substring(0, ticketNumber.indexOf(' '));
+        return numbersFromTicketString(ticketNumber);
     }
     return "";
+}
+
+function numbersFromTicketString(string) {
+    string = string.substring(string.indexOf('#') + 1);
+    return string.substring(0, string.indexOf(' '));
 }

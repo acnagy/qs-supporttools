@@ -186,21 +186,43 @@ chrome.commands.onCommand.addListener(function(command) {
     	});
     } else if (command === "copyTicketNumber") {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            chrome.tabs.sendMessage(tabs[0]['id'], {method: command}, function(response) {
-                console.log(response);
-                copyToClipboard(response.ticketNumber);
-                notifyCopiedTicketNumber(response.ticketNumber);
+            chrome.tabs.sendMessage(tabs[0]['id'], {method: command}, function(ticket) {
+                if (ticket.type !== 'none') copyToClipboard(ticket.ticketNumber);
+                notifyCopiedTicketNumber(ticket);
             });
         });
     }
 });
 
-function notifyCopiedTicketNumber(ticketNumber) {
+function notifyCopiedTicketNumber(ticket) {
+    var title = "";
+    var message = "";
+    var iconUrl = "";
+    switch (ticket.type) {
+        case "none":
+            title = "No ticket found";
+            message = "";
+            iconUrl = "/images/icon.png";
+            break;
+        case "zendesk":
+            title = "Zendesk ticket number copied";
+            message = ticket.ticketNumber;
+            iconUrl = "/images/zd.png";
+            break;
+        case "assembla":
+            title = "Assembla ticket number copied";
+            message = ticket.ticketNumber;
+            iconUrl = "/images/assembla.png";
+            break;
+        default:
+            return;
+            break;
+    }
     var opt = {
         type: "basic",
-        title: "Copied ticket number",
-        message: ticketNumber,
-        iconUrl: "icon.png"
+        title: title,
+        message: message,
+        iconUrl: iconUrl
     }
     chrome.notifications.create('', opt, function(notificationId){
         setTimeout(function() {
