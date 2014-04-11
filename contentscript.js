@@ -39,11 +39,7 @@ function getAssemblaTicket() {
     if (url.indexOf("assembla") > -1 && url.indexOf('tickets') > -1) {
         var lastPath = url.split('/');
         lastPath = lastPath[lastPath.indexOf('tickets') + 1];
-        poundIndex = lastPath.indexOf("#");
-        if (poundIndex > -1) {
-            lastPath = lastPath.substring(0, poundIndex);
-        }
-        return lastPath;
+        return numbersAtStart(lastPath);
     }
     return "";
 }
@@ -53,12 +49,7 @@ function ticketFromUrl() {
     if (url.indexOf('zendesk') > -1 && url.indexOf('tickets') > -1) {
         urlArray = url.split('/');
         ticketNum = urlArray[urlArray.length - 1];
-        
-        questionMarkIndex = ticketNum.indexOf('?')
-        if (questionMarkIndex > -1) {
-            ticketNum = ticketNum.substring(0, questionMarkIndex);
-        }
-        return ticketNum;
+        return numbersAtStart(ticketNum);
     }
     return "";
 }
@@ -76,7 +67,7 @@ function ticketFromHighlightedFrame() {
 function ticketFromNotice() {
     var notice = $('#notice').first();
     if (notice.length !== 0) {
-    	return numbersFromTicketString(notice.text());
+    	return numbersAtStart(notice.text());
     }
     return "";
 }
@@ -91,7 +82,7 @@ function ticketFromHighlighted() {
     return "";
 }
 
-function numbersFromTicketString(string) {
-    string = string.substring(string.indexOf('#') + 1);
-    return string.substring(0, string.indexOf(' '));
+// http://stackoverflow.com/a/609588/1628796
+function numbersAtStart(string) {
+    return parseInt(string.match(/\d+/)[0], 10);
 }
