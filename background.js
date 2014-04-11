@@ -179,9 +179,9 @@ chrome.commands.onCommand.addListener(function(command) {
     		if (tabs.length < 1) {
     			alert("Zopim dashboard isn't open.")
     		} else {
-    			chrome.tabs.sendMessage(tabId, {method: command});
     			chrome.tabs.update(tabId, {active: true});
     			chrome.windows.update(windowId, {focused: true});
+    			chrome.tabs.sendMessage(tabId, {method: command});
     		}
     	});
     } else if (command === "copyTicketNumber") {
