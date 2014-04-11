@@ -7,13 +7,14 @@
     "commands": {
         "answerChat": {
             "description": "Answer Zopim Chat",
+            "global": true,
             "suggested_key": {
                 "default": "Ctrl+Shift+A"
-            },
-            "global": true
+            }
         },
         "copyTicketNumber": {
             "description": "Copy Zendesk ticket number",
+            "global": true,
             "suggested_key": {
                 "default": "Alt+T"
             }
