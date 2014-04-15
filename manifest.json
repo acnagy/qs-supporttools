@@ -9,14 +9,14 @@
             "description": "Answer Zopim Chat",
             "global": true,
             "suggested_key": {
-                "default": "Ctrl+Shift+A"
+                "default": "Ctrl+Shift+0"
             }
         },
         "copyTicketNumber": {
             "description": "Copy Zendesk ticket number",
             "global": true,
             "suggested_key": {
-                "default": "Alt+T"
+                "default": "Ctrl+Shift+9"
             }
         }
     },
@@ -32,7 +32,7 @@
             ]
         }
     ],
-    "description": "Find prospect sales users on Zopim with an omnibar button and answer chats with Control/Command-Shift-A. Copy current Zendesk/Assembla ticket number via Alt-T.",
+    "description": "Find prospect sales users on Zopim with an Omnibar button and answer chats from anywhere with Cntl/Command+Shift+0. Copy current Zendesk/Assembla ticket number with Cntl/Command+Shift+9.",
     "icons": {
         "128": "images/icon.png"
     },
@@ -48,5 +48,5 @@
         "notifications",
         "clipboardWrite"
     ],
-    "version": "1.2"
+    "version": "1.3"
 }
