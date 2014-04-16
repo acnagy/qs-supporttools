@@ -19,6 +19,9 @@ Array.prototype.match = function(toMatch) {
 	return matchedArray;
 } 
 
+// =====================================================================
+// = Either get online trial schools or parse trial schools on Control =
+// =====================================================================
 
 // Called when the user clicks on the page action.
 chrome.pageAction.onClicked.addListener(function(tab) {
@@ -32,6 +35,10 @@ function switchToPageURL(tab) {
 		parseZopim(tab);	
 	});
 }
+
+// ========================================
+// = Parse Zopim for online trial schools =
+// ========================================
 
 function parseZopim(tab) {
 	chrome.tabs.sendMessage(tab.id, {method: "getText"}, function(response) {
@@ -118,6 +125,10 @@ function dashboardOrControl(tab) {
 // Listen for any changes to the URL of any tab.
 chrome.tabs.onUpdated.addListener(checkForValidUrl);
 
+// ==============================================================
+// = Parse school codes on Control for collecting Trial schools =
+// ==============================================================
+
 function parseSchoolcodes(tab) {
 	chrome.tabs.sendMessage(tab.id, {method: "getText"}, function(response) {
 		if (response.method === "getText") {
@@ -193,6 +204,10 @@ chrome.commands.onCommand.addListener(function(command) {
         });
     }
 });
+
+// ==============================
+// = Copy current ticket number =
+// ==============================
 
 function notifyCopiedTicketNumber(ticket) {
     var title = "";
