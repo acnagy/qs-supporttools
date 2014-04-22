@@ -1,5 +1,6 @@
 {
     "background": {
+        "persistent": true,
         "scripts": [
             "background.js"
         ]
@@ -23,7 +24,7 @@
     "content_scripts": [
         {
             "js": [
-                "contentscript.js",
+                "qs-supporttools.js",
                 "jqeury.min.js"
             ],
             "matches": [
@@ -48,6 +49,6 @@
         "notifications",
         "clipboardWrite"
     ],
-    "version": "1.3",
-    "short_name": "QS Tools"
+    "short_name": "QS Tools",
+    "version": "1.3"
 }
