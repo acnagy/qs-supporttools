@@ -32,7 +32,7 @@
             ]
         }
     ],
-    "description": "Find prospect sales users on Zopim with an Omnibar button and answer chats from anywhere with Cntl/Command+Shift+0. Copy current Zendesk/Assembla ticket number with Cntl/Command+Shift+9.",
+    "description": "Tools to make life easier for QuickSchools Support Engineers by automating common tasks.",
     "icons": {
         "128": "images/icon.png"
     },
@@ -48,5 +48,6 @@
         "notifications",
         "clipboardWrite"
     ],
-    "version": "1.3"
+    "version": "1.3",
+    "short_name": "QS Tools"
 }
