@@ -1,3 +1,10 @@
+// 
+//  background.js
+//  Rick Nagy
+//  2014-04-23
+// 
+
+
 // goo.gl/CevJ6G
 Array.prototype.getUnique = function() {
    var u = {}, a = [];
@@ -18,6 +25,10 @@ Array.prototype.match = function(toMatch) {
 	}
 	return matchedArray;
 } 
+
+String.prototype.contains = function(searchString) {
+    return (this.indexOf(searchString) > -1);
+}
 
 // =====================================================================
 // = Either get online trial schools or parse trial schools on Control =
@@ -105,25 +116,41 @@ function parseZopim(tab) {
 
 // Called when the url of a tab changes.
 function checkForValidUrl(tabId, changeInfo, tab) {
-	if (dashboardOrControl(tab) === "control") {
-		chrome.pageAction.setTitle({'tabId' : tabId, 'title' : 'QS Online Trial Finder'});
+    var url = tab.url;
+	if (url.contains("Customer%20Outreach")) {
+        // Control
+		chrome.pageAction.setTitle({
+                'tabId' : tabId,
+                'title' : 'QS Support Tools'
+        });
 	    chrome.pageAction.show(tabId);
-	} else if (dashboardOrControl(tab) === "dashboard") {
-		chrome.pageAction.setTitle({'tabId' : tabId, 'title' : 'Find Online Trial Schools'});
+	} else if (url.contains("dashboard.zopim.com")) {
+        // Zopim dashboard
+		chrome.pageAction.setTitle({
+            'tabId' : tabId,
+            'title' : 'Find Online Trial Schools'
+        });
 		chrome.pageAction.show(tabId)
+	} else if (url.contains("https://quickschoolsinc.zendesk.com/tickets")) {
+        // old ZD
+        redirectToNewZD(tab);
 	}
-};
-
-function dashboardOrControl(tab) {
-	if (tab.url.indexOf('Customer%20Outreach') > -1) {
-		return "control"
-	} else if (tab.url.indexOf('dashboard.zopim.com') > -1) {
-		return "dashboard"
-	} else return "";
 }
 
 // Listen for any changes to the URL of any tab.
 chrome.tabs.onUpdated.addListener(checkForValidUrl);
+
+// =================================================
+// = Redirect old ZD pages to new ZD when possible =
+// =================================================
+
+function redirectToNewZD(tab) {
+    chrome.tabs.update(tab.id, {url: newZdUrl(tab.url)});
+}
+
+function newZdUrl(oldUrl) {
+    return oldUrl.replace("tickets", "agent/#/tickets");
+}
 
 // ==============================================================
 // = Parse school codes on Control for collecting Trial schools =
