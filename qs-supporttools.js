@@ -51,13 +51,13 @@ function assemblaTicketFromUrl() {
     if (url.indexOf("assembla") > -1 && url.indexOf("tickets") > -1) {
         var lastPath = url.split("/");
         lastPath = lastPath[lastPath.indexOf("tickets") + 1];
-        return ticketNumber(lastPath);
+        return firstNumber(lastPath);
     }
     return "";
 }
 
 function highlightedAssemblaTicket() {
-    return ticketNumber($("tr:hover").children("td.number").text());
+    return firstNumber($("tr:hover").children("td.number").text());
 }
 
 function ticketFromUrl() {
@@ -65,7 +65,7 @@ function ticketFromUrl() {
     if (url.indexOf("zendesk") > -1 && url.indexOf("tickets") > -1) {
         var urlArray = url.split("/");
         var ticketNum = urlArray[urlArray.length - 1];
-        return ticketNumber(ticketNum);
+        return firstNumber(ticketNum);
     }
     return "";
 }
@@ -78,8 +78,8 @@ function ticketFromHighlightedFrame() {
     var highlightedTicket = $("* .ticket:hover");
     var ticketText = highlightedTicket.children(".date").text();
     if (ticketText !== undefined) {
-        var ticketNumber = ticketText.substring(ticketText.indexOf("#") + 1);
-        return ticketNumber.substring(0, ticketNumber.indexOf(" "));
+        var ticketNum = ticketText.substring(ticketText.indexOf("#") + 1);
+        return ticketNum.substring(0, ticketNum.indexOf(" "));
     }    
     return "";
 }
@@ -87,7 +87,7 @@ function ticketFromHighlightedFrame() {
 function ticketFromNotice() {
     var notice = $("#notice").first();
     if (notice.length !== 0) {
-        return ticketNumber(notice.text());
+        return firstNumber(notice.text());
     }
     return "";
 }
@@ -96,8 +96,8 @@ function ticketFromHighlighted() {
     var tooltipId = $("*[aria-describedby*='ui']").attr("aria-describedby");
     if (tooltipId !== undefined) {
         var ticketText = $("#" + tooltipId + " * .title").text();
-        var ticketNumber = ticketText.substring(ticketText.indexOf("#") + 1);
-        return ticketNumber(ticketNumber);
+        var ticket = ticketText.substring(ticketText.indexOf("#") + 1);
+        return firstNumber(ticket);
     }
     return "";
 }
@@ -109,13 +109,13 @@ function ticketFromHighlighted() {
 function ticketFromPopupHTML5() {
     var text = $(".popover-title:visible").text();
     if (text !== "") {
-        return ticketNumber(text);
+        return firstNumber(text);
     }
     return "";
 }
 
 // http://stackoverflow.com/a/609588/1628796
-function ticketNumber(string) {
+function firstNumber(string) {
     matchArray = string.match(/\d+/);
     if (matchArray !== null) {
         return parseInt(matchArray[0], 10);
