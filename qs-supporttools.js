@@ -1,7 +1,10 @@
 // qs-supporttools
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.method === "answerChat") {
-		$( ".meshim_dashboard_components_chatBar_ServeRequestButton" ).first().click();
+		$( ".incoming_button" ).first().click();
+        $(".chat_bar_renderer.unread").first()
+            .mouseover()
+            .click();
 	} else if (message.method === "getText") {
 		sendResponse({data: document.documentElement.innerText, method:"getText"});
 	} else if (message.method === "copyTicketNumber") {
