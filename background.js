@@ -37,8 +37,8 @@ String.prototype.contains = function(searchString) {
 // Called when the user clicks on the page action.
 chrome.pageAction.onClicked.addListener(function(tab) {
 	var title = chrome.pageAction.getTitle({'tabId' : tab.id}, function(){});
-	if (dashboardOrControl(tab) == "control") parseSchoolcodes(tab);	
-	else if (dashboardOrControl(tab) == "dashboard") parseZopim(tab);
+	if (isOutreachReport(tab.url)) parseSchoolcodes(tab);	
+	else if (isZopim(tab.url)) parseZopim(tab);
 });
 
 function switchToPageURL(tab) {
@@ -113,32 +113,37 @@ function parseZopim(tab) {
 	});
 }
 
+function isOldZendesk(url) {
+    return url.contains("https://quickschoolsinc.zendesk.com/tickets")
+}
 
-// Called when the url of a tab changes.
-function checkForValidUrl(tabId, changeInfo, tab) {
+function isZopim(url) {
+    return url.contains("dashboard.zopim.com");
+}
+
+function isOutreachReport(url) {
+    return url.contains("Customer%20Outreach"); 
+}
+
+// Listen for any changes to the URL of any tab.
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     var url = tab.url;
-	if (url.contains("Customer%20Outreach")) {
-        // Control
+	if (isOutreachReport(url)) {
 		chrome.pageAction.setTitle({
                 'tabId' : tabId,
                 'title' : 'QS Support Tools'
         });
 	    chrome.pageAction.show(tabId);
-	} else if (url.contains("dashboard.zopim.com")) {
-        // Zopim dashboard
+	} else if (isZopim(url)) {
 		chrome.pageAction.setTitle({
             'tabId' : tabId,
             'title' : 'Find Online Trial Schools'
         });
 		chrome.pageAction.show(tabId)
-	} else if (url.contains("https://quickschoolsinc.zendesk.com/tickets")) {
-        // old ZD
+	} else if (isOldZendesk(url)) {
         redirectToNewZD(tab);
 	}
-}
-
-// Listen for any changes to the URL of any tab.
-chrome.tabs.onUpdated.addListener(checkForValidUrl);
+});
 
 // =================================================
 // = Redirect old ZD pages to new ZD when possible =
