@@ -37,6 +37,7 @@ function getTicketNumber() {
 function getZendeskTicket() {
     var ticket = ticketFromUrl();
     if (ticket === "") ticket = ticketFromPopupHTML5();
+    if (ticket === "") ticket = ticketFromNotificationHTML5();
     if (ticket === "") ticket = ticketFromNotice();
     if (ticket === "") ticket = ticketFromHighlighted();
     if (ticket === "") ticket = ticketFromHighlightedFrame();
@@ -111,6 +112,14 @@ function ticketFromHighlighted() {
 
 function ticketFromPopupHTML5() {
     var text = $(".popover-title:visible").text();
+    if (text !== "") {
+        return firstNumber(text);
+    }
+    return "";
+}
+
+function ticketFromNotificationHTML5() {
+    var text = $(".jGrowl-notification:visible").text();
     if (text !== "") {
         return firstNumber(text);
     }
