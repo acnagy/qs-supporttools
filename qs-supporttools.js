@@ -1,16 +1,35 @@
 // qs-supporttools
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.method === "answerChat") {
-		$( ".incoming_button" ).first().click();
-        $(".chat_bar_renderer.unread").first()
-            .mouseover()
-            .click();
+        if (!answerChat()){
+            openUnreadChat();
+        }
 	} else if (message.method === "getText") {
 		sendResponse({data: document.documentElement.innerText, method:"getText"});
 	} else if (message.method === "copyTicketNumber") {
         sendResponse(getTicketNumber());
 	}
 });
+
+function answerChat() {
+    var incomingMessage = $(".incoming_button.active");
+    if (incomingMessage.length > 0) {
+        incomingMessage.click();
+        return true;
+    }
+    return false;
+}
+
+function openUnreadChat() {
+    var unreadChats = $(".chat_bar_renderer.unread");
+    if (unreadChats.length > 0) {
+        unreadChats.first()
+            .mouseover()
+            .click();
+        var chatFrame = $(".chat_log_holder:visible");
+        chatFrame.prop("scrollTop", chatFrame.prop("scrollHeight"));
+    }
+}
 
 function getTicketNumber() {
     var type = "none";
