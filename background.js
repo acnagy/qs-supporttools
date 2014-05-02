@@ -4,7 +4,6 @@
 //  2014-04-23
 // 
 
-
 // goo.gl/CevJ6G
 Array.prototype.getUnique = function() {
    var u = {}, a = [];
@@ -279,14 +278,14 @@ function notifyCopiedTicketNumber(ticket) {
     });
 }
 
-function copyToClipboard( text ){
-    var copyDiv = document.createElement('div');
+function copyToClipboard(text){
+    var copyDiv = document.createElement("div")
     copyDiv.contentEditable = true;
     document.body.appendChild(copyDiv);
     copyDiv.innerHTML = text;
     copyDiv.unselectable = "off";
     copyDiv.focus();
-    document.execCommand('SelectAll');
+    document.execCommand("SelectAll");
     document.execCommand("Copy", false, null);
     document.body.removeChild(copyDiv);
 }
