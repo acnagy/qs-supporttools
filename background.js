@@ -29,6 +29,7 @@ String.prototype.contains = function(searchString) {
     return (this.indexOf(searchString) > -1);
 }
 
+
 // =====================================================================
 // = Either get online trial schools or parse trial schools on Control =
 // =====================================================================
@@ -113,36 +114,38 @@ function parseZopim(tab) {
 }
 
 function isOldZendesk(url) {
-    return url.contains("https://quickschoolsinc.zendesk.com/tickets")
+    return url.match(".com/tickets/") != null;
 }
 
 function isZopim(url) {
-    return url.contains("dashboard.zopim.com");
+    return url.match("dashboard.zopim.com") != null;
 }
 
 function isOutreachReport(url) {
-    return url.contains("Customer%20Outreach"); 
+    return url.match("Customer%20Outreach") != null; 
 }
 
 // Listen for any changes to the URL of any tab.
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    var url = tab.url;
-    if (isOldZendesk(url)) {
-        // first since redirect speed is import
-        redirectToNewZD(tab);
-    } else if (isOutreachReport(url)) {
-		chrome.pageAction.setTitle({
+    var url = changeInfo.url;
+    if (url !== undefined) {
+        if (isOldZendesk(url)) {
+            // first since redirect speed is import
+            redirectToNewZD(tab);
+        } else if (isOutreachReport(url)) {
+    		chrome.pageAction.setTitle({
+                    'tabId' : tabId,
+                    'title' : 'QS Support Tools'
+            });
+    	    chrome.pageAction.show(tabId);
+    	} else if (isZopim(url)) {
+    		chrome.pageAction.setTitle({
                 'tabId' : tabId,
-                'title' : 'QS Support Tools'
-        });
-	    chrome.pageAction.show(tabId);
-	} else if (isZopim(url)) {
-		chrome.pageAction.setTitle({
-            'tabId' : tabId,
-            'title' : 'Find Online Trial Schools'
-        });
-		chrome.pageAction.show(tabId)
-	}
+                'title' : 'Find Online Trial Schools'
+            });
+    		chrome.pageAction.show(tabId)
+    	}   
+    }
 });
 
 // =================================================
