@@ -29,6 +29,23 @@ String.prototype.contains = function(searchString) {
     return (this.indexOf(searchString) > -1);
 }
 
+// currently filtering for ALL requests (or none), so doesn't work
+chrome.webRequest.onBeforeRequest.addListener(function(details) {
+    return newZdUrl(details.url)
+}, {
+    // urls: ["*://*.zendesk.com/tickets/*"],
+    urls: ["<all_urls>"]
+    types: ["main_frame"]
+}, ["blocking"])
+
+function redirect(details) {
+    var url = details.url;
+    var oldZd = ".com/tickets/"
+    if (url.match(oldZd) !== null) {
+        return 
+    }
+}
+
 // =====================================================================
 // = Either get online trial schools or parse trial schools on Control =
 // =====================================================================
