@@ -128,7 +128,10 @@ function isOutreachReport(url) {
 // Listen for any changes to the URL of any tab.
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     var url = tab.url;
-	if (isOutreachReport(url)) {
+    if (isOldZendesk(url)) {
+        // first since redirect speed is import
+        redirectToNewZD(tab);
+    } else if (isOutreachReport(url)) {
 		chrome.pageAction.setTitle({
                 'tabId' : tabId,
                 'title' : 'QS Support Tools'
@@ -140,8 +143,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
             'title' : 'Find Online Trial Schools'
         });
 		chrome.pageAction.show(tabId)
-	} else if (isOldZendesk(url)) {
-        redirectToNewZD(tab);
 	}
 });
 
