@@ -233,6 +233,9 @@ chrome.commands.onCommand.addListener(function(command) {
     } else if (command === "copyTicketNumber") {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             chrome.tabs.sendMessage(tabs[0]['id'], {method: command}, function(ticket) {
+                if (!ticket) {
+                    ticket = {type: "none"};
+                }
                 if (ticket.type !== 'none') copyToClipboard(ticket.ticketNumber);
                 notifyCopiedTicketNumber(ticket);
             });

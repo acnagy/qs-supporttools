@@ -7,7 +7,8 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 	} else if (message.method === "getText") {
 		sendResponse({data: document.documentElement.innerText, method:"getText"});
 	} else if (message.method === "copyTicketNumber") {
-        sendResponse(getTicketNumber());
+        ticket = getTicketNumber();
+        sendResponse(ticket);
 	}
 });
 
@@ -36,7 +37,7 @@ function getTicketNumber() {
     var ticket = "";
     var url = document.URL;
     
-    if (url.indexOf("zendesk") > -1) {
+    if (url.match("zendesk")) {
         var zdTicket = getZendeskTicket();
         if (zdTicket !== "") {
             type = "zendesk";
@@ -49,7 +50,6 @@ function getTicketNumber() {
             ticket = assemblaTicket;
         }
     }
-
     return {type:type, ticketNumber:"#" + ticket};
 }
 
@@ -85,10 +85,12 @@ function highlightedAssemblaTicket() {
 
 function ticketFromUrl() {
     var url = document.URL;
-    if (url.indexOf("zendesk") > -1 && url.indexOf("tickets") > -1) {
+    if (url.match("zendesk") && url.match("tickets")) {
         var urlArray = url.split("/");
         var ticketNum = urlArray[urlArray.length - 1];
-        return firstNumber(ticketNum);
+        if (firstNumber) {
+            return firstNumber(ticketNum);
+        }
     }
     return "";
 }
