@@ -282,13 +282,11 @@ function notifyCopiedTicketNumber(ticket) {
 }
 
 function copyToClipboard(text){
-    var copyDiv = document.createElement("div")
+    var copyDiv = document.createElement("textarea")
     copyDiv.contentEditable = true;
     document.body.appendChild(copyDiv);
-    copyDiv.innerHTML = text;
-    copyDiv.unselectable = "off";
-    copyDiv.focus();
-    document.execCommand("SelectAll");
-    document.execCommand("Copy", false, null);
+    copyDiv.value = text;
+    copyDiv.select();
+    document.execCommand("Copy");
     document.body.removeChild(copyDiv);
 }
