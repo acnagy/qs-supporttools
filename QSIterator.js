@@ -96,11 +96,8 @@ QSIterator.prototype._loop = function() {
  * 
  * @return boolean whether or not there was another elem to select
  */
-QSIterator.prototype._nextElem = function() {
-    if (!this.useFirst)
-        this.currentIndex ++;
-        
-    if (this.currentIndex < this.elems.length) {
+QSIterator.prototype._nextElem = function() {        
+    if (!this.useFirst || this.currentIndex < this.elems.length) {
         this.elems = $(this.selector);  // always refresh the elems
         this.elem = this.elems.get(this.currentIndex);   
         return true;
