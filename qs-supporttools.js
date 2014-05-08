@@ -1,4 +1,5 @@
 // qs-supporttools
+
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.method === "answerChat") {
         if (!answerChat()){

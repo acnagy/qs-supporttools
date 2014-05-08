@@ -25,7 +25,8 @@
         {
             "js": [
                 "qs-supporttools.js",
-                "jqeury.min.js"
+                "jqeury.min.js",
+                "qs-controller.js"
             ],
             "matches": [
                 "http://*/*",
@@ -47,8 +48,12 @@
         "tabs",
         "storage",
         "notifications",
-        "clipboardWrite"
+        "clipboardWrite",
+        "activeTab"
     ],
     "short_name": "QS Tools",
-    "version": "1.33.3"
+    "version": "1.33.3",
+    "web_accessible_resources": [
+        "QSIterator.js"
+    ]
 }

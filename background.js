@@ -29,6 +29,8 @@ String.prototype.contains = function(searchString) {
     return (this.indexOf(searchString) > -1);
 }
 
+// run every time page loads
+chrome.tabs.executeScript(null, {file: "QSIterator.js"});
 
 // =====================================================================
 // = Either get online trial schools or parse trial schools on Control =
