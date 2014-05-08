@@ -38,12 +38,8 @@ function QSIterator(selector, loopFunc, useFirst) {
     
     this.loopFunc = loopFunc;
     this.currentIndex = -1;
-    this.endNow = false;
     this._nextElem();
-    
-    $(window).keypress(function(e) {
-        if (e.which === 3) this.endNow = true;
-    });
+    qsIteratorEndNow = false;
 }
 
 QSIterator.prototype.start = function() {
@@ -59,16 +55,38 @@ QSIterator.prototype.next = function() {
     });
 };
 
-/** Use to click a button on the screen, such as Save & Close */
-QSIterator.prototype.click = function(buttonTitle) {
-    $("button:contains(" + buttonTitle + ")").first().click();
+/** 
+ * Use to click a button on the screen, such as Save & Close
+ * @param buttonTitle   the element's (button's) title/text
+ * @param buttonsOnly   default is true - only select button elements
+ * @return boolean      whether anything that has a click event was found/clicked
+ */
+QSIterator.prototype.click = function(buttonTitle, buttonsOnly) {
+    buttonsOnly = (buttonsOnly === null) ? true : buttonsOnly;
+    
+    var selectorBase = buttonsOnly ? "button" : "*";
+    var buttons = $(selectorBase + ":contains(" + buttonTitle + ")");
+    for (var i = buttons.length - 1; i >= 0; i--) {
+        var button = buttons.eq(i);
+        var data = button.data("events");
+        if (data !== undefined && data.click !== undefined) {
+            button.click();
+            return true;
+        }
+    }
+    return false;
 };
 
 QSIterator.prototype.close = function() {
-    while ($("*:contains(Close),*:contains(Back to list)").length) {
-        $( "*:contains(Close),*:contains(Back to list)" ).click();
-    }
+    this.clickAll("Cancel") // loading dialog
+    this.clickAll("Close")
+    this.clickAll("Back to list");
+    qsIteratorEndNow = false;
 };
+
+QSIterator.prototype.clickAll = function(buttonTitle) {
+    while (this.click(buttonTitle, false));
+}
 
 QSIterator.prototype.quit = function() {
     this.close();
@@ -76,15 +94,19 @@ QSIterator.prototype.quit = function() {
 };
 
 QSIterator.prototype.afterLoad = function(callback, param) {
-    if (this.endNow) this.quit();
-    else {
-        var load = setInterval(function(obj) {
-            if (!$("*[class^='load']:visible:not(.ribbonSelectorWidget *)").length) {
-                clearInterval(load);
-                callback.call(obj, param);
-            }
-        }, 10, this);
-    }
+    callback = callback.bind(this);
+    var quit = this.quit.bind(this);
+    
+    var loadingSelector = "*[class^='load']:visible:not(.ribbonSelectorWidget *)";
+    var load = setInterval(function() {
+        if (qsIteratorEndNow) {
+            clearInterval(load);
+            quit();
+        } else if (!$(loadingSelector).length) {
+            clearInterval(load);
+            callback(param);
+        }
+    }, 10);
 };
 
 QSIterator.prototype._loop = function() {
@@ -96,7 +118,8 @@ QSIterator.prototype._loop = function() {
  * 
  * @return boolean whether or not there was another elem to select
  */
-QSIterator.prototype._nextElem = function() {        
+QSIterator.prototype._nextElem = function() {    
+    this.currentIndex ++;    
     if (!this.useFirst || this.currentIndex < this.elems.length) {
         this.elems = $(this.selector);  // always refresh the elems
         this.elem = this.elems.get(this.currentIndex);   
@@ -118,3 +141,11 @@ QSIterator.staticAfterLoad = function(callback, param) {
         } 
     }, 10);
 }
+
+/* for cancelling QSIterator loops */
+qsIteratorEndNow = false;
+$(window).keypress(function(e) {
+    if (e.which === 3) {
+        qsIteratorEndNow = true;
+    }
+});
