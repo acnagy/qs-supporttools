@@ -18,6 +18,9 @@
 
  * @param useFirst      (optional) always use the first element.
  *                          use this if the action element is removed in each loop
+ * @param maxIters		(optional) max number of loops to execute
+ * @param increment		(optional) number to increment this.elem by in each loop
+							defaults to 1
  *
  * important/useful methods:
  * @method start        call the first loop()
@@ -32,12 +35,15 @@
  * @method staticAfterLoad  static version of afterLoad
  */
 
-function QSIterator(selector, loopFunc, useFirst) {    
+function QSIterator(selector, loopFunc, useFirst, maxIters, increment) {    
     this.selector = selector;
-    this.useFirst = useFirst === null ? false : useFirst;
+    this.useFirst = useFirst === undefined ? false : useFirst;
+	this.increment = increment === undefined ? 1 : increment;
     
     this.loopFunc = loopFunc;
-    this.currentIndex = -1;
+	this.maxIters = maxIters;
+    this.currentIndex = 0 - this.increment;
+	this.elems = $(this.selector);
     this._nextElem();
     qsIteratorEndNow = false;
 }
@@ -58,14 +64,12 @@ QSIterator.prototype.next = function() {
 /** 
  * Use to click a button on the screen, such as Save & Close
  * @param buttonTitle   the element's (button's) title/text
- * @param buttonsOnly   default is true - only select button elements
  * @return boolean      whether anything that has a click event was found/clicked
  */
-QSIterator.prototype.click = function(buttonTitle, buttonsOnly) {
-    buttonsOnly = (buttonsOnly === null) ? true : buttonsOnly;
-    
-    var selectorBase = buttonsOnly ? "button" : "*";
-    var buttons = $(selectorBase + ":contains(" + buttonTitle + ")");
+QSIterator.prototype.click = function(buttonTitle) {
+	// output like: button:contains(Save), .allButtons:contains(Save)
+    var buttons = $("button" + ":contains(" + buttonTitle + ")"
+		+ ", .allbuttons" + ":contains(" + buttonTitle + ")");
     for (var i = buttons.length - 1; i >= 0; i--) {
         var button = buttons.eq(i);
         var data = button.data("events");
@@ -118,15 +122,15 @@ QSIterator.prototype._loop = function() {
  * 
  * @return boolean whether or not there was another elem to select
  */
-QSIterator.prototype._nextElem = function() {    
-    this.currentIndex ++;    
-    if (!this.useFirst || this.currentIndex < this.elems.length) {
+QSIterator.prototype._nextElem = function() {
+	this.currentIndex = (this.useFirst) ? 0 : this.currentIndex + this.increment;
+    if (this.currentIndex < this.elems.length
+			&& (this.maxIters === undefined || this.currentIndex < this.maxIters)) {
         this.elems = $(this.selector);  // always refresh the elems
-        this.elem = this.elems.get(this.currentIndex);   
+        this.elem = this.elems.get(this.currentIndex);
         return true;
     } else {
-        this.close();
-        console.log("All finished!");
+        console.log("All Done");
         return false;
     }
 };
