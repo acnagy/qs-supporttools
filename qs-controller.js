@@ -16,21 +16,14 @@
 $(window).load(function() {
 	if (document.URL.match("quickschools.com")
 			|| document.URL.match("smartschoolcentral.com")) {
+		injectScript("/libraries/Fiber.js", false);	
 		injectScript("QSIterator.js");
-		injectScript("QSTableIterator.js")
-		injectScript("/JS.Class/src/loader-browser.js", false);
-		
-		jsClassSrc = chrome.extension.getURL("/JS.Class/src/loader-browser.js");
-		$("head").append($("<script>JSCLASS_PATH = '" + jsClassSrc + "'</script>"))
+		injectScript("QSTableIterator.js");
 	}
-})
+});
 
 function injectScript(filename, isLocal) {
-	var isLocal = isLocal || true;
-	var src = (isLocal || typeof isLocal === "undefined")
-			? chrome.extension.getURL(filename)
-			: filename;
 	$("head").append(
-		$("<script src='" + src + "'></script>")
+		$("<script src='" + chrome.extension.getURL(filename) + "'></script>")
 	);
 }
