@@ -27,9 +27,10 @@ $(window).load(function() {
 
 function injectScript(filename, isLocal) {
 	var isLocal = isLocal || true;
-	var s = document.createElement("script");
-	s.src = (isLocal || typeof isLocal === "undefined")
-		? chrome.extension.getURL(filename)
-		: filename;
-	(document.head||document.documentElement).appendChild(s);
+	var src = (isLocal || typeof isLocal === "undefined")
+			? chrome.extension.getURL(filename)
+			: filename;
+	$("head").append(
+		$("<script src='" + src + "'></script>")
+	);
 }
