@@ -25,7 +25,7 @@
         {
             "js": [
                 "qs-supporttools.js",
-                "jqeury.min.js",
+                "libraries/jquery.js",
                 "qs-controller.js"
             ],
             "matches": [
@@ -56,6 +56,6 @@
     "web_accessible_resources": [
         "QSIterator.js",
 				"QSTableIterator.js",
-				"JS.Class/src/loader-browser.js"
+				"libraries/Fiber.js"
     ]
 }
