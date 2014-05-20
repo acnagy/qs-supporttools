@@ -54,6 +54,8 @@
     "short_name": "QS Tools",
     "version": "1.33.3",
     "web_accessible_resources": [
-        "QSIterator.js"
+        "QSIterator.js",
+				"QSTableIterator.js",
+				"JS.Class/src/loader-browser.js"
     ]
 }

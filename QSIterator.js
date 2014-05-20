@@ -1,5 +1,11 @@
+// 
+//  QSIterator.js
+//  Rick Nagy
+//  2014-05-10
+// 
+
+
 /**
- * QSIterator.js
  *
  * this file is here to make QSIterator() available globally (for console js scripts)
  *
@@ -52,23 +58,29 @@ QSIterator.prototype.start = function() {
     this._loop();
 }
 
-/** Call this each time to restart the loop */
+/** 
+ * MUST call this each time to restart the loop
+ * override to change what happens before going to the next _loop 
+ */
 QSIterator.prototype.next = function() {
-    this.afterLoad(function() {
-        if (this._nextElem()) {
-            this._loop();
-        }
-    });
+	this.afterLoad(function() {
+	    if (this._nextElem()) {
+	        this._loop();
+	    }
+	});
 };
 
 /** 
  * Use to click a button on the screen, such as Save & Close
  * @param buttonTitle   the element's (button's) title/text
+ * @param onlyButtons	only click buttons. Defaults to true
  * @return boolean      whether anything that has a click event was found/clicked
  */
-QSIterator.prototype.click = function(buttonTitle) {
+QSIterator.prototype.click = function(buttonTitle, onlyButtons) {
+	var selectorBase = (onlyButtons) ? "button" : "*";
+	
 	// output like: button:contains(Save), .allButtons:contains(Save)
-    var buttons = $("button" + ":contains(" + buttonTitle + ")"
+    var buttons = $(selectorBase + ":contains(" + buttonTitle + ")"
 		+ ", .allbuttons" + ":contains(" + buttonTitle + ")");
     for (var i = buttons.length - 1; i >= 0; i--) {
         var button = buttons.eq(i);
@@ -113,6 +125,10 @@ QSIterator.prototype.afterLoad = function(callback, param) {
     }, 10);
 };
 
+/**
+ * The internal code to run on each loop
+ * override to change what happens in each loop other than loopFunc
+ */
 QSIterator.prototype._loop = function() {
     this.loopFunc();
 }
@@ -136,7 +152,7 @@ QSIterator.prototype._nextElem = function() {
 };
 
 /* static version of afterLoad for external use
- * TODO merge this into a single function with afterLoad */
+ * TODO: merge this into a single function with afterLoad */
 QSIterator.staticAfterLoad = function(callback, param) {
     var load = setInterval(function() {
         if (!$("*[class^='load']:visible:not(.ribbonSelectorWidget *)").length) {
@@ -146,10 +162,12 @@ QSIterator.staticAfterLoad = function(callback, param) {
     }, 10);
 }
 
-/* for cancelling QSIterator loops */
-qsIteratorEndNow = false;
-$(window).keypress(function(e) {
-    if (e.which === 3) {
-        qsIteratorEndNow = true;
-    }
-});
+/* loads on all pages for cancelling QSIterator loops */
+if (typeof $ !== "undefined") {
+	qsIteratorEndNow = false;
+	$(window).keypress(function(e) {
+	    if (e.which === 3) {
+	        qsIteratorEndNow = true;
+	    }
+	});
+}
