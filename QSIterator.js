@@ -24,9 +24,9 @@
 
  * @param useFirst      (optional) always use the first element.
  *                          use this if the action element is removed in each loop
- * @param maxIters		(optional) max number of loops to execute
- * @param increment		(optional) number to increment this.elem by in each loop
-							defaults to 1
+ * @param maxIters        (optional) max number of loops to execute
+ * @param increment        (optional) number to increment this.elem by in each loop
+                            defaults to 1
  *
  * important/useful methods:
  * @method start        call the first loop()
@@ -41,133 +41,140 @@
  * @method staticAfterLoad  static version of afterLoad
  */
 
-function QSIterator(selector, loopFunc, useFirst, maxIters, increment) {    
-    this.selector = selector;
-    this.useFirst = useFirst === undefined ? false : useFirst;
-	this.increment = increment === undefined ? 1 : increment;
-    
-    this.loopFunc = loopFunc;
-	this.maxIters = maxIters;
-    this.currentIndex = 0 - this.increment;
-	this.elems = $(this.selector);
-    this._nextElem();
-    qsIteratorEndNow = false;
-}
+QSIterator = Fiber.extend(function() { return {
+    init: function(selector, loopFunc, useFirst, maxIters, increment) {    
+        this.selector = selector;
+        this.useFirst = useFirst === undefined ? false : useFirst;
+        this.increment = increment === undefined ? 1 : increment;
 
-QSIterator.prototype.start = function() {
-    this._loop();
-}
+        this.loopFunc = loopFunc;
+        this.maxIters = maxIters;
+        this.currentIndex = 0 - this.increment;
+        this.elems = $(this.selector);
+        qsIteratorEndNow = false;
+    },
 
-/** 
- * MUST call this each time to restart the loop
- * override to change what happens before going to the next _loop 
- */
-QSIterator.prototype.next = function() {
-	this.afterLoad(function() {
-	    if (this._nextElem()) {
-	        this._loop();
-	    }
-	});
-};
-
-/** 
- * Use to click a button on the screen, such as Save & Close
- * @param buttonTitle   the element's (button's) title/text
- * @param onlyButtons	only click buttons. Defaults to true
- * @return boolean      whether anything that has a click event was found/clicked
- */
-QSIterator.prototype.click = function(buttonTitle, onlyButtons) {
-	var selectorBase = (onlyButtons) ? "button" : "*";
-	
-	// output like: button:contains(Save), .allButtons:contains(Save)
-    var buttons = $(selectorBase + ":contains(" + buttonTitle + ")"
-		+ ", .allbuttons" + ":contains(" + buttonTitle + ")");
-    for (var i = buttons.length - 1; i >= 0; i--) {
-        var button = buttons.eq(i);
-        var data = button.data("events");
-        if (data !== undefined && data.click !== undefined) {
-            button.click();
-            return true;
+    start: function() {
+        if (this._nextElem()) {
+            this._loop();
+        } else {
+            this.quit("no elements matching selector");
         }
-    }
-    return false;
-};
+    },
 
-QSIterator.prototype.close = function() {
-    this.clickAll("Cancel") // loading dialog
-    this.clickAll("Close")
-    this.clickAll("Back to list");
-    qsIteratorEndNow = false;
-};
+    /** 
+     * MUST call this each time to restart the loop
+     * override to change what happens before going to the next _loop 
+     */
+    next: function() {
+        this.afterLoad(function() {
+            if (this._nextElem()) {
+                this._loop();
+            }
+        });
+    },
 
-QSIterator.prototype.clickAll = function(buttonTitle) {
-    while (this.click(buttonTitle, false));
-}
+    /** 
+     * Use to click a button on the screen, such as Save & Close
+     * @param buttonTitle   the element's (button's) title/text
+     * @param onlyButtons    only click buttons. Defaults to true
+     * @return boolean      whether anything that has a click event was found/clicked
+     */
+    click: function(buttonTitle, onlyButtons) {
+        var selectorBase = (onlyButtons) ? "button" : "*";
 
-QSIterator.prototype.quit = function() {
-    this.close();
-    throw new Error("Aborted JS");
-};
-
-QSIterator.prototype.afterLoad = function(callback, param) {
-    callback = callback.bind(this);
-    var quit = this.quit.bind(this);
-    
-    var loadingSelector = "*[class^='load']:visible:not(.ribbonSelectorWidget *)";
-    var load = setInterval(function() {
-        if (qsIteratorEndNow) {
-            clearInterval(load);
-            quit();
-        } else if (!$(loadingSelector).length) {
-            clearInterval(load);
-            callback(param);
+        // output like: button:contains(Save), .allButtons:contains(Save)
+        var buttons = $(selectorBase + ":contains(" + buttonTitle + ")"
+            + ", .allbuttons" + ":contains(" + buttonTitle + ")");
+        for (var i = buttons.length - 1; i >= 0; i--) {
+            var button = buttons.eq(i);
+            var data = button.data("events");
+            if (data !== undefined && data.click !== undefined) {
+                button.click();
+                return true;
+            }
         }
-    }, 10);
-};
-
-/**
- * The internal code to run on each loop
- * override to change what happens in each loop other than loopFunc
- */
-QSIterator.prototype._loop = function() {
-    this.loopFunc();
-}
-
-/**
- * set this.elem to the next elem or trigger end condition
- * 
- * @return boolean whether or not there was another elem to select
- */
-QSIterator.prototype._nextElem = function() {
-	this.currentIndex = (this.useFirst) ? 0 : this.currentIndex + this.increment;
-    if (this.currentIndex < this.elems.length
-			&& (this.maxIters === undefined || this.currentIndex < this.maxIters)) {
-        this.elems = $(this.selector);  // always refresh the elems
-        this.elem = this.elems.get(this.currentIndex);
-        return true;
-    } else {
-        console.log("All Done");
         return false;
+    },
+
+    close: function() {
+        this.clickAll("Cancel"); // loading dialog
+        this.clickAll("Close");
+        this.clickAll("Back to list");
+        qsIteratorEndNow = false;
+    },
+
+    clickAll: function(buttonTitle) {
+        while (this.click(buttonTitle, false));
+    },
+
+    quit: function(reason) {
+        this.close();
+        throw new Error(reason);
+    },
+
+    afterLoad: function(callback, param) {
+        callback = callback.bind(this);
+        var quit = this.quit.bind(this);
+
+        var loadingSelector = "*[class^='load']:visible:not(.ribbonSelectorWidget *)";
+        var load = setInterval(function() {
+            if (qsIteratorEndNow) {
+                clearInterval(load);
+                quit("cancelled");
+            } else if (!$(loadingSelector).length) {
+                clearInterval(load);
+                callback(param);
+            }
+        }, 10);
+    },
+
+    /**
+     * The internal code to run on each loop
+     * override to change what happens in each loop other than loopFunc
+     */
+    _loop: function() {
+        this.afterLoad(function() {
+            this.loopFunc();
+        })
+    },
+
+    /**
+     * set this.elem to the next elem or trigger end condition
+     * 
+     * @return boolean whether or not there was another elem to select
+     */
+    _nextElem: function() {
+        this.currentIndex = (this.useFirst) ? 0 : this.currentIndex + this.increment;
+        if (this.currentIndex < this.elems.length
+                && (this.maxIters === undefined || this.currentIndex < this.maxIters)) {
+            this.elems = $(this.selector);  // always refresh the elems
+            this.elem = this.elems.get(this.currentIndex);
+            return true;
+        } else {
+            console.log("All Done");
+            return false;
+        }
     }
-};
+};});
 
 /* static version of afterLoad for external use
  * TODO: merge this into a single function with afterLoad */
-QSIterator.staticAfterLoad = function(callback, param) {
+qsAfterLoad = function(callback, param) {
     var load = setInterval(function() {
         if (!$("*[class^='load']:visible:not(.ribbonSelectorWidget *)").length) {
             clearInterval(load);
             callback(param);
         } 
     }, 10);
-}
+};
 
 /* loads on all pages for cancelling QSIterator loops */
 if (typeof $ !== "undefined") {
-	qsIteratorEndNow = false;
-	$(window).keypress(function(e) {
-	    if (e.which === 3) {
-	        qsIteratorEndNow = true;
-	    }
-	});
+    qsIteratorEndNow = false;
+    $(window).keypress(function(e) {
+        if (e.which === 3) {
+            qsIteratorEndNow = true;
+        }
+    });
 }

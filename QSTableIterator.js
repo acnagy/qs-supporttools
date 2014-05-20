@@ -10,34 +10,23 @@
  *		such as transcripts, report cards, students, etc
  * 
  * @param loopFunc		the code to run in each entry after load
- * other params are the same, and selector is removed
+ * optional params are the same, and selector is removed
  */
 
-QSTableIterator.prototype = QSIterator.prototype;
-function QSTableIterator(loopFunc, useFirst, maxIters, increment) {
-	var SELECTOR = ".dttd:nth-child(2):visible";
-	loopFunc = this.transformLoopFunc(loopFunc);
+QSTableIterator = QSIterator.extend(function(base) { return {
+	SELECTOR: ".dttd:nth-child(2):visible",
 	
-	QSIterator.call(this, SELECTOR, loopFunc, useFirst, maxIters, increment);
-	this.next = this.tableNext;
-}
-
-QSTableIterator.prototype.transformLoopFunc = function(loopFunc) {
-	return function() {
+	init: function(loopFunc, useFirst, maxIters, increment) {
+		base.init.call(this, this.SELECTOR, loopFunc, useFirst, maxIters, increment);
+	},
+	
+	_loop: function() {
 		this.elem.click();
-		loopFunc();
-		#TODO: OVERRIDE this.next
+		base._loop.call(this);
+	},
+	
+	next: function() {
+		this.click("Save") || this.click("Save & Close");
+		base.next.call(this);
 	}
-}
-
-QSTableIterator.prototype.tableNext = function() {
-	if (!this.click("Save & Close")) {
-		this.click("Save");
-		this.afterLoad(function() {
-			this.click("Close", false);
-			QSIterator.next.call(this);
-		})
-	} else {
-		QSIterator.next.call(this);
-	}
-};
+};});
