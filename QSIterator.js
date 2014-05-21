@@ -21,13 +21,13 @@
  *
  * @param selector      the jQuery selector to use to find the elements
  *                          **this is mandatory and very important**
- * @param loopFunc     the function that is called in each loop
+ * @param loopFunc      the function that is called in each loop
  *                          **this is also mandatory and deteremines the behavior**
 
  * @param useFirst      (optional) always use the first element.
  *                          use this if the action element is removed in each loop
- * @param maxIters        (optional) max number of loops to execute
- * @param increment        (optional) number to increment this.elem by in each loop
+ * @param maxIters      (optional) max number of loops to execute
+ * @param increment     (optional) number to increment this.elem by in each loop
                             defaults to 1
  *
  * important/useful methods:
