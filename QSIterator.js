@@ -117,6 +117,7 @@ QSIterator.prototype.quit = function(reason, close, isError) {
     isError = (typeof isError === "undefined") ? true : isError;
     close = (typeof close === "undefined") ? true : close;
     
+    this.afterNestedLoadsCallback = null;
     if (close) {
         this.close();
     }
