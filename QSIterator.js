@@ -10,7 +10,9 @@
  * this file is here to make QSIterator() available globally (for console js scripts)
  *
  * QSIterators can be used to QSIterator over several QS elements and *do something*
- * the key method is QSIterator.afterLoad(), which allows asynchronous functions
+ * the key method is QSIterator.afterLoad(), which allows asynchronous functions\
+ *
+ * Subclass with: ClassUtil.inherit(SubClass, this, QSIterator)
  *
  * pass in a(n) (anonymous) function as loopFunc to determine the behavior
  * loopFunc is called in each loop with this.elem() also updated
@@ -31,8 +33,6 @@
  * important/useful methods:
  * @method start        call the first loop()
  * @method afterLoad    wait for QS to load before continuing
- * @method next         repeat the process on the next loop
- *                          no need to wrap in afterLoad() here
  * @method click        click a button on the page
  * @method close        click all Close buttons (no call to next())
  * @method quit         quit the process
@@ -41,140 +41,161 @@
  * @method staticAfterLoad  static version of afterLoad
  */
 
-QSIterator = Fiber.extend(function() { return {
-    init: function(selector, loopFunc, useFirst, maxIters, increment) {    
-        this.selector = selector;
-        this.useFirst = useFirst === undefined ? false : useFirst;
-        this.increment = increment === undefined ? 1 : increment;
+function QSIterator(selector, loopFunc, useFirst, maxIters, increment) {
+    this.selector = selector;
+    this.useFirst = useFirst === undefined ? false : useFirst;
+    this.increment = increment === undefined ? 1 : increment;
 
-        this.loopFunc = loopFunc;
-        this.maxIters = maxIters;
-        this.currentIndex = 0 - this.increment;
-        this.elems = $(this.selector);
-        qsIteratorEndNow = false;
-    },
+    this.loopFunc = loopFunc;
+    this.maxIters = maxIters;
+    this.currentIndex = 0 - this.increment;
+    this.elems = $(this.selector);
+    qsIteratorEndNow = false;
+}
 
-    start: function() {
+/**
+ * Start the loop process. THis is all that's required to run the loop,
+ *  since the rest is iterative.
+ */
+QSIterator.prototype.start = function() {
+    if (this._nextElem()) {
+        this._loop();
+    } else {
+        this.close();
+        this.quit("no elements matching selector");
+    }
+};
+
+/** 
+ * is called to go back to the beginning of the loop
+ * subclass to change what happens after being done with the current elem
+ */
+QSIterator.prototype._next = function() {
+    this.afterLoad(function() {
         if (this._nextElem()) {
             this._loop();
-        } else {
-            this.quit("no elements matching selector");
         }
-    },
+    });
+};
 
-    /** 
-     * MUST call this each time to restart the loop
-     * override to change what happens before going to the next _loop 
-     */
-    next: function() {
-        this.afterLoad(function() {
-            if (this._nextElem()) {
-                this._loop();
-            }
-        });
-    },
+/** 
+ * Use to click a button on the screen, such as Save & Close
+ * @param buttonTitle   the element's (button's) title/text
+ * @param onlyButtons    only click buttons. Defaults to true
+ * @return boolean      whether anything that has a click event was found/clicked
+ */
+QSIterator.prototype.click = function(buttonTitle, onlyButtons) {
+    var selectorBase = (onlyButtons) ? "button" : "*";
 
-    /** 
-     * Use to click a button on the screen, such as Save & Close
-     * @param buttonTitle   the element's (button's) title/text
-     * @param onlyButtons    only click buttons. Defaults to true
-     * @return boolean      whether anything that has a click event was found/clicked
-     */
-    click: function(buttonTitle, onlyButtons) {
-        var selectorBase = (onlyButtons) ? "button" : "*";
-
-        // output like: button:contains(Save), .allButtons:contains(Save)
-        var buttons = $(selectorBase + ":contains(" + buttonTitle + ")"
-            + ", .allbuttons" + ":contains(" + buttonTitle + ")");
-        for (var i = buttons.length - 1; i >= 0; i--) {
-            var button = buttons.eq(i);
-            var data = button.data("events");
-            if (data !== undefined && data.click !== undefined) {
-                button.click();
-                return true;
-            }
-        }
-        return false;
-    },
-
-    close: function() {
-        this.clickAll("Cancel"); // loading dialog
-        this.clickAll("Close");
-        this.clickAll("Back to list");
-        qsIteratorEndNow = false;
-    },
-
-    clickAll: function(buttonTitle) {
-        while (this.click(buttonTitle, false));
-    },
-
-    quit: function(reason) {
-        this.close();
-        throw new Error(reason);
-    },
-
-    afterLoad: function(callback, param) {
-        callback = callback.bind(this);
-        var quit = this.quit.bind(this);
-
-        var loadingSelector = "*[class^='load']:visible:not(.ribbonSelectorWidget *)";
-        var load = setInterval(function() {
-            if (qsIteratorEndNow) {
-                clearInterval(load);
-                quit("cancelled");
-            } else if (!$(loadingSelector).length) {
-                clearInterval(load);
-                callback(param);
-            }
-        }, 10);
-    },
-
-    /**
-     * The internal code to run on each loop
-     * override to change what happens in each loop other than loopFunc
-     */
-    _loop: function() {
-        this.afterLoad(function() {
-            this.loopFunc();
-        })
-    },
-
-    /**
-     * set this.elem to the next elem or trigger end condition
-     * 
-     * @return boolean whether or not there was another elem to select
-     */
-    _nextElem: function() {
-        this.currentIndex = (this.useFirst) ? 0 : this.currentIndex + this.increment;
-        if (this.currentIndex < this.elems.length
-                && (this.maxIters === undefined || this.currentIndex < this.maxIters)) {
-            this.elems = $(this.selector);  // always refresh the elems
-            this.elem = this.elems.get(this.currentIndex);
+    // output like: button:contains(Save), .allButtons:contains(Save)
+    var buttons = $(selectorBase + ":contains(" + buttonTitle + ")" +
+        ", .allbuttons" + ":contains(" + buttonTitle + ")");
+    for (var i = buttons.length - 1; i >= 0; i--) {
+        var button = buttons.eq(i);
+        var data = button.data("events");
+        if (data !== undefined && data.click !== undefined) {
+            button.click();
             return true;
-        } else {
-            console.log("All Done");
-            return false;
         }
     }
-};});
+    return false;
+};
+
+QSIterator.prototype.close = function() {
+    this.clickAll("Cancel"); // loading dialog
+    this.clickAll("Close");
+    this.clickAll("Back to list");
+    qsIteratorEndNow = false;
+};
+
+QSIterator.prototype.clickAll = function(buttonTitle) {
+    while (this.click(buttonTitle, false));
+};
+
+QSIterator.prototype.quit = function(reason) {
+    this.close();
+    throw new Error(reason);
+};
+
+QSIterator.prototype.afterLoad = function(callback, param) {
+    var callback = callback.bind(this);
+    var quit = this.quit.bind(this);
+    var callAfterNestedLoads = function(){};
+    if (!callback.toString().match("afterLoad") &&
+            this.afterNestedLoadsCallback) {
+        callAfterNestedLoads = this.afterNestedLoadsCallback.bind(this);
+    }
+
+    var loadingSelector = "*[class^='load']:visible:not(.ribbonSelectorWidget *)";
+    var load = setInterval(function() {
+        if (qsIteratorEndNow) {
+            clearInterval(load);
+            quit("cancelled");
+        } else if (!$(loadingSelector).length) {
+            clearInterval(load);
+            callback(param);
+            callAfterNestedLoads();
+        }
+    }, 10);
+};
+
+/**
+ * The internal code to run on each loop
+ * override to change what happens in each loop other than loopFunc
+ */
+QSIterator.prototype._loop = function() {
+    this.afterLoad(function() {
+        this.withCallbackAfter(this.loopFunc, this._next);
+    });
+};
+
+/**
+ * TODO: avoid race conditions with parallel calls to this
+ *
+ * @param withNesting   function with nested calls to afterLoad
+ * @param callbackAfter function to call once all nested calls have finished
+ */
+QSIterator.prototype.withCallbackAfter = function(withNesting, callbackAfter) {
+    this.afterNestedLoadsCallback = function() {
+        this.afterNestedLoadsCallback = null;
+        callbackAfter.call(this);
+    };
+    withNesting.call(this);
+}
+
+/**
+ * set this.elem to the next elem or trigger end condition
+ * 
+ * @return boolean whether or not there was another elem to select
+ */
+QSIterator.prototype._nextElem = function() {
+    this.currentIndex = (this.useFirst) ? 0 : this.currentIndex + this.increment;
+    if (this.currentIndex < this.elems.length &&
+            (this.maxIters === undefined || this.currentIndex < this.maxIters)) {
+        this.elems = $(this.selector);  // always refresh the elems
+        this.elem = this.elems.get(this.currentIndex);
+        return true;
+    } else {
+        console.log("All Done");
+        return false;
+    }
+};
 
 /* static version of afterLoad for external use
  * TODO: merge this into a single function with afterLoad */
-qsAfterLoad = function(callback, param) {
+function qsAfterLoad(callback, param) {
     var load = setInterval(function() {
         if (!$("*[class^='load']:visible:not(.ribbonSelectorWidget *)").length) {
             clearInterval(load);
             callback(param);
         } 
     }, 10);
-};
+}
 
 /* loads on all pages for cancelling QSIterator loops */
-if (typeof $ !== "undefined") {
-    qsIteratorEndNow = false;
-    $(window).keypress(function(e) {
-        if (e.which === 3) {
-            qsIteratorEndNow = true;
-        }
-    });
-}
+qsIteratorEndNow = false;
+$(window).keypress(function(e) {
+    if (e.which === 3) {
+        qsIteratorEndNow = true;
+    }
+});
