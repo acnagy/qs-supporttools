@@ -61,8 +61,7 @@ QSIterator.prototype.start = function() {
     if (this._nextElem()) {
         this._loop();
     } else {
-        this.close();
-        this.quit("no elements matching selector");
+        this.quit("no elements matching selector", false, false);
     }
 };
 
@@ -74,6 +73,8 @@ QSIterator.prototype._next = function() {
     this.afterLoad(function() {
         if (this._nextElem()) {
             this._loop();
+        } else {
+            this.quit("finished: no more elements matching selector", undefined, false);
         }
     });
 };
@@ -112,19 +113,35 @@ QSIterator.prototype.clickAll = function(buttonTitle) {
     while (this.click(buttonTitle, false));
 };
 
-QSIterator.prototype.quit = function(reason) {
-    this.close();
-    throw new Error(reason);
+QSIterator.prototype.quit = function(reason, close, isError) {
+    isError = (typeof isError === "undefined") ? true : isError;
+    close = (typeof close === "undefined") ? true : close;
+    
+    if (close) {
+        this.close();
+    }
+    if (isError) {
+        throw new Error(reason);
+    } else {
+        console.log(reason);
+    }
+    
 };
 
+/**
+ * call callback once the loading dialog disappears
+ *
+ * @param callback      the function to call - must be in this.prototype
+ * @param param         param for callback
+ */
 QSIterator.prototype.afterLoad = function(callback, param) {
-    var callback = callback.bind(this);
-    var quit = this.quit.bind(this);
     var callAfterNestedLoads = function(){};
     if (!callback.toString().match("afterLoad") &&
             this.afterNestedLoadsCallback) {
         callAfterNestedLoads = this.afterNestedLoadsCallback.bind(this);
     }
+    var callback = callback.bind(this);
+    var quit = this.quit.bind(this);
 
     var loadingSelector = "*[class^='load']:visible:not(.ribbonSelectorWidget *)";
     var load = setInterval(function() {
@@ -139,17 +156,12 @@ QSIterator.prototype.afterLoad = function(callback, param) {
     }, 10);
 };
 
-/**
- * The internal code to run on each loop
- * override to change what happens in each loop other than loopFunc
- */
-QSIterator.prototype._loop = function() {
-    this.afterLoad(function() {
-        this.withCallbackAfter(this.loopFunc, this._next);
-    });
-};
 
 /**
+ * get a callback when a nested set of afterLoad()s finishes
+ * i.e. once the last afterLoad callback is done, callbackAfter is fired
+ * callbackAfter is either called from afterLoad or here
+ *
  * TODO: avoid race conditions with parallel calls to this
  *
  * @param withNesting   function with nested calls to afterLoad
@@ -161,7 +173,21 @@ QSIterator.prototype.withCallbackAfter = function(withNesting, callbackAfter) {
         callbackAfter.call(this);
     };
     withNesting.call(this);
+
+    if (!withNesting.toString().match("afterLoad")) {
+        this.afterNestedLoadsCallback();
+    }
 }
+
+/**
+ * The internal code to run on each loop
+ * override to change what happens in each loop other than loopFunc
+ */
+QSIterator.prototype._loop = function() {
+    this.afterLoad(function() {
+        this.withCallbackAfter(this.loopFunc, this._next);
+    });
+};
 
 /**
  * set this.elem to the next elem or trigger end condition
@@ -176,7 +202,6 @@ QSIterator.prototype._nextElem = function() {
         this.elem = this.elems.get(this.currentIndex);
         return true;
     } else {
-        console.log("All Done");
         return false;
     }
 };
