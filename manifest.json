@@ -55,7 +55,6 @@
     "version": "1.33.3",
     "web_accessible_resources": [
         "QSIterator.js",
-				"QSTableIterator.js",
-				"libraries/Fiber.js"
+				"QSTableIterator.js"
     ]
 }
