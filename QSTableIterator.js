@@ -13,20 +13,19 @@
  * optional params are the same, and selector is removed
  */
 
-QSTableIterator = QSIterator.extend(function(base) { return {
-	SELECTOR: ".dttd:nth-child(2):visible",
-	
-	init: function(loopFunc, useFirst, maxIters, increment) {
-		base.init.call(this, this.SELECTOR, loopFunc, useFirst, maxIters, increment);
-	},
-	
-	_loop: function() {
-		this.elem.click();
-		base._loop.call(this);
-	},
-	
-	next: function() {
-		this.click("Save") || this.click("Save & Close");
-		base.next.call(this);
-	}
-};});
+function QSTableIterator(loopFunc, useFirst, maxIters, increment) {
+    ClassUtil.inherit(QSTableIterator, this, QSIterator);
+    this._super(this.SELECTOR, loopFunc, useFirst, maxIters, increment);
+}
+
+QSTableIterator.prototype.SELECTOR = ".dttd:nth-child(2):visible";
+
+QSTableIterator.prototype._loop = function() {
+	this.elem.click();
+	this.superclass._loop.call(this);
+};
+
+QSTableIterator.prototype._next = function() {
+	this.click("Save") || this.click("Save & Close");
+	this.superclass._next.call(this);
+};
