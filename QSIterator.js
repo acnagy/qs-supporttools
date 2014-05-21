@@ -135,6 +135,8 @@ QSIterator.prototype.quit = function(reason, close, isError) {
  * @param param         param for callback
  */
 QSIterator.prototype.afterLoad = function(callback, param) {
+    this.afterLoadHasBeenCalled = true;
+    
     var callAfterNestedLoads = function(){};
     if (!callback.toString().match("afterLoad") &&
             this.afterNestedLoadsCallback) {
@@ -164,17 +166,19 @@ QSIterator.prototype.afterLoad = function(callback, param) {
  *
  * TODO: avoid race conditions with parallel calls to this
  *
- * @param withNesting   function with nested calls to afterLoad
- * @param callbackAfter function to call once all nested calls have finished
+ * @param funcWithNesting   function with nested calls to afterLoad
+ * @param callbackAfter     function to call once all nested calls have finished
  */
-QSIterator.prototype.withCallbackAfter = function(withNesting, callbackAfter) {
+QSIterator.prototype.withCallbackAfter = function(funcWithNesting, callbackAfter) {
+    this.afterLoadHasBeenCalled = false;
+    
     this.afterNestedLoadsCallback = function() {
         this.afterNestedLoadsCallback = null;
         callbackAfter.call(this);
     };
-    withNesting.call(this);
-
-    if (!withNesting.toString().match("afterLoad")) {
+    
+    funcWithNesting.call(this);
+    if (!this.afterLoadHasBeenCalled) {
         this.afterNestedLoadsCallback();
     }
 }
