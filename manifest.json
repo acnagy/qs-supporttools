@@ -55,6 +55,8 @@
     "version": "1.33.3",
     "web_accessible_resources": [
         "QSIterator.js",
-				"QSTableIterator.js"
+				"QSTableIterator.js",
+        "QSScraper.js",
+        "libraries/json2csv.js"
     ]
 }
