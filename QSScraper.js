@@ -55,7 +55,27 @@ QSScraper.prototype.export = function(filename) {
         if (err) {
             console.log(err);
         } else {
-            console.log(csv);
+            downloadFile(csv, filename + ".csv");
         }
     });
 };
+
+/**
+ * Makes a file then initiates a download
+ * from http://jsfiddle.net/koldev/cW7W5/
+ * 
+ * @param fileBody          a string of the body of the file
+ * @param filename          the filename
+ */
+var downloadFile = function(fileBody, filename) {
+   var blob = new Blob([fileBody], {type: 'text/html'});
+   var url = URL.createObjectURL(blob);
+   
+   var a = document.createElement("a");
+   document.body.appendChild(a);
+   a.href = url;
+   a.download = filename;
+   a.click();
+   window.URL.revokeObjectURL(url);
+   document.body.removeChild(a);
+}
