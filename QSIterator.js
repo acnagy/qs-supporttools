@@ -58,12 +58,21 @@ function QSIterator(selector, loopFunc, useFirst, maxIters, increment) {
  *  since the rest is iterative.
  */
 QSIterator.prototype.start = function() {
+    
     if (this._nextElem()) {
         this._loop();
     } else {
         this.quit("no elements matching selector", false, false);
     }
 };
+
+/**
+ * Set what happens after completion
+ * Completion is after loopFunc on last elem OR on this.complete()
+ */
+QSIterator.prototype.onCompletion = function(callback) {
+    this.onCompletion = callback;   
+}
 
 /** 
  * is called to go back to the beginning of the loop
@@ -74,7 +83,7 @@ QSIterator.prototype._next = function() {
         if (this._nextElem()) {
             this._loop();
         } else {
-            this.quit("finished: no more elements matching selector", undefined, false);
+            this.complete("complete: no more elements matching selector");
         }
     });
 };
@@ -111,6 +120,13 @@ QSIterator.prototype.close = function() {
 
 QSIterator.prototype.clickAll = function(buttonTitle) {
     while (this.click(buttonTitle, false));
+};
+
+QSIterator.prototype.complete = function(reason) {
+    if (this.onCompletion) {
+        this.onCompletion();
+    }
+    this.quit(reason, true, false);
 };
 
 QSIterator.prototype.quit = function(reason, close, isError) {
@@ -168,7 +184,7 @@ QSIterator.prototype.afterLoad = function(callback, param) {
  * TODO: avoid race conditions with parallel calls to this
  *
  * @param funcWithNesting   function with nested calls to afterLoad
- * @param callbackAfter     function to call once all nested calls have finished
+ * @param callbackAfter     function to call once all nested calls have complete
  */
 QSIterator.prototype.withCallbackAfter = function(funcWithNesting, callbackAfter) {
     this.afterLoadHasBeenCalled = false;
@@ -179,7 +195,7 @@ QSIterator.prototype.withCallbackAfter = function(funcWithNesting, callbackAfter
     };
     
     funcWithNesting.call(this);
-    if (!this.afterLoadHasBeenCalled) {
+    if (!this.afterLoadHasBeenCalled && this.afterNestedLoadsCallback) {
         this.afterNestedLoadsCallback();
     }
 }

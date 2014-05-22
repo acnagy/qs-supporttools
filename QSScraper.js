@@ -5,10 +5,10 @@
 // 
 
 /**
- * Use for scraping data off of QS Pages
+ * Use for scraping _data off of QS Pages
  * 
  * Useful for making "exports" that wouldn't be otherwise possible
- * this.data is an array - fill it with objects.
+ * this._data is an array - fill it with objects.
  * Each property (from all objects) gets a column in the CSV. If an object
  *      has no value for a given property, the cell will be empty.
  * 
@@ -16,21 +16,21 @@
  */
 
 function QSScraper() {
-    this.data = [];
-    this.properties = [];
+    this._data = [];
+    this._properties = [];
 }
 
 /**
- * Adds an object to the data array.
- * If the object has a property that is new, it's added to this.properties
+ * Adds an object to the _data array.
+ * If the object has a property that is new, it's added to this._properties
  */
 QSScraper.prototype.add = function(object) {    
     for (var propertyName in object) {
-        if (this.properties.indexOf(propertyName) < 0) {
-            this.properties.push(propertyName);
+        if (this._properties.indexOf(propertyName) < 0) {
+            this._properties.push(propertyName);
         }
     }
-    this.data.push(object);
+    this._data.push(object);
 };
 
 /**
@@ -38,20 +38,11 @@ QSScraper.prototype.add = function(object) {
  * 
  * @param filename      the filename, without extension (optional)
  */
-QSScraper.prototype.export = function(filename) {
-    filename = filename || "Scraped QS Data";
+QSScraper.prototype.export = function(filename) {    
+    filename = filename || "Scraped QS _data";
     
-    for (var i = 0; i < this.data.length; i++) {
-        var entry = this.data[i];
-        for (var j = 0; j < this.properties.length; j++) {
-            var prop = this.properties[j];
-            if (!entry.hasOwnProperty(prop)) {
-                entry[prop] = "";
-            }
-        }
-    }
-    
-    json2csv(this.data, function(err, csv) {
+    this._updateProperties();
+    json2csv(this._data, function(err, csv) {
         if (err) {
             console.log(err);
         } else {
@@ -61,8 +52,32 @@ QSScraper.prototype.export = function(filename) {
 };
 
 /**
+ * Return this._data
+ */
+QSScraper.prototype.getData = function() {
+    this._updateProperties();
+    return this._data;
+}
+
+/**
+ * Updates all entries in this._data to have the same _properties
+ */
+QSScraper.prototype._updateProperties = function() {
+    for (var i = 0; i < this._data.length; i++) {
+        var entry = this._data[i];
+        for (var j = 0; j < this._properties.length; j++) {
+            var prop = this._properties[j];
+            if (!entry.hasOwnProperty(prop)) {
+                entry[prop] = "";
+            }
+        }
+    }
+    
+}
+
+/**
  * Makes a file then initiates a download
- * from http://jsfiddle.net/koldev/cW7W5/
+ * adapted from http://jsfiddle.net/koldev/cW7W5/
  * 
  * @param fileBody          a string of the body of the file
  * @param filename          the filename

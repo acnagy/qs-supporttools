@@ -26,6 +26,14 @@ QSTableIterator.prototype._loop = function() {
 };
 
 QSTableIterator.prototype._next = function() {
-	this.click("Save") || this.click("Save & Close");
+    if (this.setCloseButtonText) {
+        this.click(this.closeButtonText);
+    } else {
+        this.click("Save") || this.click("Save & Close");   
+    }
 	this.superclass._next.call(this);
+};
+
+QSTableIterator.prototype.setCloseButtonText = function(buttonText) {
+    this.closeButtonText = buttonText;
 };
