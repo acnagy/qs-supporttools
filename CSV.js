@@ -6,19 +6,10 @@
 
 /**
  * Global object for converting an array of objects to a CSV string
- */
-
-
-/**
- * Convenience method for converting a JSON-serialiable object to CSV
- */
-function objectsToCSV(rows) {
-    var csv = new CSV();
-    return csv.writeRows(rows);
-}
-
-/**
- * CSV file object for creating and adding a CSV file
+ * CSV is an object for creating and adding a CSV file
+ * 
+ * easy way to create a CSV from an array of objects:
+ *  new CSV().writeRows(data);
  */
 function CSV() {
     this._contents = "";

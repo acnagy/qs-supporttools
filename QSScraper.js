@@ -41,14 +41,9 @@ QSScraper.prototype.add = function(object) {
 QSScraper.prototype.export = function(filename) {    
     filename = filename || "Scraped QS _data";
     
-    this._updateProperties();
-    json2csv(this._data, function(err, csv) {
-        if (err) {
-            console.log(err);
-        } else {
-            downloadFile(csv, filename + ".csv");
-        }
-    });
+    // this._updateProperties();
+    var csvString = new CSV.writeRows(this._data);
+    downloadFile(csv, filename + ".csv");
 };
 
 /**
