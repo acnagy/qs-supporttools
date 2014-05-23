@@ -57,6 +57,7 @@
         "QSIterator.js",
 				"QSTableIterator.js",
         "QSScraper.js",
+        "CSV.js",
         "libraries/json2csv.js"
     ]
 }

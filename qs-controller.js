@@ -19,7 +19,7 @@ $(window).load(function() {
 		injectScript("QSIterator.js");
 		injectScript("QSTableIterator.js");
         injectScript("QSScraper.js");
-        injectScript("libraries/json2csv.js");
+        injectScript("CSV.js");
 	}
 });
 
