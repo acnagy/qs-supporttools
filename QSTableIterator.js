@@ -34,6 +34,10 @@ QSTableIterator.prototype._next = function() {
 	this.superclass._next.call(this);
 };
 
-QSTableIterator.prototype.setCloseButtonText = function(buttonText) {
+/**
+ * Set the text of the close button
+ * overrides the default "Save & Close"
+ */
+QSTableIterator.prototype.setCloseButton = function(buttonText) {
     this.closeButtonText = buttonText;
 };

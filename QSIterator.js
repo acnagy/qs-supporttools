@@ -70,8 +70,8 @@ QSIterator.prototype.start = function() {
  * Set what happens after completion
  * Completion is after loopFunc on last elem OR on this.complete()
  */
-QSIterator.prototype.onCompletion = function(callback) {
-    this.onCompletion = callback;   
+QSIterator.prototype.onComplete = function(callback) {
+    this.onCompletionCallback = callback;   
 }
 
 /** 
@@ -123,8 +123,8 @@ QSIterator.prototype.clickAll = function(buttonTitle) {
 };
 
 QSIterator.prototype.complete = function(reason) {
-    if (this.onCompletion) {
-        this.onCompletion();
+    if (this.onCompletionCallback) {
+        this.onCompletionCallback();
     }
     this.quit(reason, true, false);
 };
