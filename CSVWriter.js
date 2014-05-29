@@ -1,19 +1,23 @@
 // 
-//  CSV.js
+//  CSVWriter.js
 //  Rick Nagy (@br1ckb0t)
 //  2014-05-23
 //
 
 /**
- * Global object for converting an array of objects to a CSV string
+ * Global object for converting an array of objects to a CSVWriter string
  * CSV is an object for creating and adding a CSV file
  * 
  * easy way to create a CSV from an array of objects:
- *  new CSV().writeRows(data);
+ *  new CSVWriter().writeRows(data);
  */
-function CSV() {
+function CSVWriter() {
     this._contents = "";
     this._headerKeys = [];
+}
+
+function csvTest() {
+    return new CSVWriter().writeRows({"hi": 'Hi, Im "Rick"'});
 }
 
 /**
@@ -21,9 +25,9 @@ function CSV() {
  * Uses the keys from the first object for the header
  *
  * @param rows      array the rows to write, in order    
- * @return          finished CSV
+ * @return          finished CSVWriter
  */
-CSV.prototype.writeRows = function(rows) {
+CSVWriter.prototype.writeRows = function(rows) {
     if (!(rows instanceof Array)) {
         rows = [rows];
     }
@@ -38,7 +42,7 @@ CSV.prototype.writeRows = function(rows) {
  * 
  * @param keys      array of keys to write, in the order
  */
-CSV.prototype.writeHeader = function(keys) {
+CSVWriter.prototype.writeHeader = function(keys) {
     if (!this._headerKeys.length) {
         this._headerKeys = keys;
         keys.forEach(function(key) {
@@ -55,7 +59,7 @@ CSV.prototype.writeHeader = function(keys) {
  * 
  * @param row       object to write. Must not have any keys not in the header
  */
-CSV.prototype.writeRow = function(row) {
+CSVWriter.prototype.writeRow = function(row) {
     if (!this._headerKeys.length) {
         this.writeHeader(Object.getOwnPropertyNames(row));
     }
@@ -75,17 +79,22 @@ CSV.prototype.writeRow = function(row) {
  * 
  * @param str       the string to add. Can null/undefined.
  */
-CSV.prototype.addVal = function(str) {
+CSVWriter.prototype.addVal = function(str) {
     str = str || "";
-    this._contents += JSON.stringify(str);
+    this._contents += this.escape(str);
     this._contents += this.DELIMETER;
+};
+
+// TODO: properly escape " and ,
+CSVWriter.prototype.escape = function(str) {
+    return JSON.stringify(str);
 };
 
 /**
  * Adds a newline to the end of the CSV
  * If necessary, strips a delimeter at the end of the current line
  */
-CSV.prototype.addNewline = function() {
+CSVWriter.prototype.addNewline = function() {
     this.stripLast(this.DELIMETER);
     this._contents += this.NEWLINE;
 };
@@ -95,7 +104,7 @@ CSV.prototype.addNewline = function() {
  *
  * @param lastStr       the char to strip
  */
-CSV.prototype.stripLast = function(lastStr) {
+CSVWriter.prototype.stripLast = function(lastStr) {
     var len = this._contents.length;
     if (this._contents.substring(len - lastStr.length) === lastStr) {
         this._contents = this._contents.substring(0, len - lastStr.length);
@@ -105,14 +114,14 @@ CSV.prototype.stripLast = function(lastStr) {
 /**
  * Value delimeter
  */
-CSV.prototype.DELIMETER = ",";
+CSVWriter.prototype.DELIMETER = ",";
 
 /**
  * Newline delimeter
  */
-CSV.prototype.NEWLINE = "\n";
+CSVWriter.prototype.NEWLINE = "\n";
 
-CSV.prototype.getCSV = function() {
+CSVWriter.prototype.getCSV = function() {
     this.stripLast(this.NEWLINE);
     return this._contents;
 };
