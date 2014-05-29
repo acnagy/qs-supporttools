@@ -49,8 +49,9 @@ function QSIterator(selector, loopFunc, useFirst, maxIters, increment) {
     this.loopFunc = loopFunc;
     this.maxIters = maxIters;
     this.currentIndex = 0 - this.increment;
+    this.loopCount = 0;
     this.elems = $(this.selector);
-    qsIteratorEndNow = false;
+    this.pauseAfterFirstLoop = false;
 }
 
 /**
@@ -58,12 +59,19 @@ function QSIterator(selector, loopFunc, useFirst, maxIters, increment) {
  *  since the rest is iterative.
  */
 QSIterator.prototype.start = function() {
-    
-    if (this._nextElem()) {
+    if (this.nextElem()) {
         this._loop();
     } else {
-        this.quit("no elements matching selector", false, false);
+        this.quit("No elements matching selector", false, false);
     }
+};
+
+/**
+ * Run this.start(), but pause before second loop
+ */
+QSIterator.prototype.runOnce = function() {
+    this.pauseAfterFirstLoop = true;
+    this.start();
 };
 
 /**
@@ -72,18 +80,18 @@ QSIterator.prototype.start = function() {
  */
 QSIterator.prototype.onComplete = function(callback) {
     this.onCompletionCallback = callback;   
-}
+};
 
 /** 
  * is called to go back to the beginning of the loop
  * subclass to change what happens after being done with the current elem
  */
-QSIterator.prototype._next = function() {
+QSIterator.prototype.next = function() {
     this.afterLoad(function() {
-        if (this._nextElem()) {
+        if (this.nextElem()) {
             this._loop();
         } else {
-            this.complete("complete: no more elements matching selector");
+            this.complete("Complete: no more elements matching selector");
         }
     });
 };
@@ -123,6 +131,7 @@ QSIterator.prototype.clickAll = function(buttonTitle) {
 };
 
 QSIterator.prototype.complete = function(reason) {
+    this.clearAfterNestedLoad();
     if (this.onCompletionCallback) {
         this.onCompletionCallback();
     }
@@ -133,12 +142,12 @@ QSIterator.prototype.quit = function(reason, close, isError) {
     isError = (typeof isError === "undefined") ? true : isError;
     close = (typeof close === "undefined") ? true : close;
     
-    this.afterNestedLoadsCallback = null;
+    this.clearAfterNestedLoad();
     if (close) {
         this.close();
     }
     if (isError) {
-        throw new Error(reason);
+        console.error(reason);
     } else {
         console.log(reason);
     }
@@ -146,28 +155,46 @@ QSIterator.prototype.quit = function(reason, close, isError) {
 };
 
 /**
+ * Pauses iteration as is (though can't be resumed)
+ * Alternative to quit that doesn't close everything
+ */
+QSIterator.prototype.pause = function(message) {
+    message = message ? ": " + message : ""
+    this.quit("Paused" + message, false, false);
+};
+
+/**
  * call callback once the loading dialog disappears
  *
- * @param callback      the function to call - must be in this.prototype
- * @param param         param for callback
+ * @param callback          the function to call - must be in this.prototype
+ * @param param             param for callback
+ * @param stopCondiction    function to determine whether to stop or not
+                                return true to stop
  */
-QSIterator.prototype.afterLoad = function(callback, param) {
+QSIterator.prototype.afterLoad = function(callback, param, stopCondition) {
     this.afterLoadHasBeenCalled = true;
+    callback = callback || function() {};
+    param = param || function() {};
+    var loadingSelector = "*[class^='load']:visible:not(.ribbonSelectorWidget *)";
+    stopCondition = stopCondition || function() {
+        return $(loadingSelector).length === 0;
+    };
     
     var callAfterNestedLoads = function(){};
-    if (!callback.toString().match("afterLoad") &&
+    var callbackString = callback.toString();
+    if (!callbackString.match("afterLoad") &&
+            !callbackString.match("next") &&
             this.afterNestedLoadsCallback) {
         callAfterNestedLoads = this.afterNestedLoadsCallback.bind(this);
     }
-    var callback = callback.bind(this);
-    var quit = this.quit.bind(this);
+    callback = callback.bind(this);
+    var quitFunc = this.quit.bind(this);
 
-    var loadingSelector = "*[class^='load']:visible:not(.ribbonSelectorWidget *)";
     var load = setInterval(function() {
         if (qsIteratorEndNow) {
             clearInterval(load);
-            quit("cancelled");
-        } else if (!$(loadingSelector).length) {
+            quitFunc("Cancelled via keyboard");
+        } else if (stopCondition()) {
             clearInterval(load);
             callback(param);
             callAfterNestedLoads();
@@ -190,7 +217,7 @@ QSIterator.prototype.withCallbackAfter = function(funcWithNesting, callbackAfter
     this.afterLoadHasBeenCalled = false;
     
     this.afterNestedLoadsCallback = function() {
-        this.afterNestedLoadsCallback = null;
+        this.clearAfterNestedLoad();
         callbackAfter.call(this);
     };
     
@@ -198,16 +225,25 @@ QSIterator.prototype.withCallbackAfter = function(funcWithNesting, callbackAfter
     if (!this.afterLoadHasBeenCalled && this.afterNestedLoadsCallback) {
         this.afterNestedLoadsCallback();
     }
-}
+};
+
+QSIterator.prototype.clearAfterNestedLoad = function() {
+    this.afterNestedLoadsCallback = null;
+};
 
 /**
  * The internal code to run on each loop
  * override to change what happens in each loop other than loopFunc
  */
 QSIterator.prototype._loop = function() {
-    this.afterLoad(function() {
-        this.withCallbackAfter(this.loopFunc, this._next);
-    });
+    if (this.pauseAfterFirstLoop && this.loopCount > 0) {
+        this.pause();
+    } else {
+        this.afterLoad(function() {
+            this.loopCount ++;
+            this.withCallbackAfter(this.loopFunc, this.next);
+        });
+    }
 };
 
 /**
@@ -215,7 +251,7 @@ QSIterator.prototype._loop = function() {
  * 
  * @return boolean whether or not there was another elem to select
  */
-QSIterator.prototype._nextElem = function() {
+QSIterator.prototype.nextElem = function() {
     this.currentIndex = (this.useFirst) ? 0 : this.currentIndex + this.increment;
     if (this.currentIndex < this.elems.length &&
             (this.maxIters === undefined || this.currentIndex < this.maxIters)) {
@@ -245,3 +281,4 @@ $(window).keypress(function(e) {
         qsIteratorEndNow = true;
     }
 });
+var qsIteratorEndNow = false;

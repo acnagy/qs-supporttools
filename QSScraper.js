@@ -17,7 +17,7 @@
 
 function QSScraper() {
     this._data = [];
-    this._properties = [];
+    return this;
 }
 
 /**
@@ -25,11 +25,6 @@ function QSScraper() {
  * If the object has a property that is new, it's added to this._properties
  */
 QSScraper.prototype.add = function(object) {    
-    for (var propertyName in object) {
-        if (this._properties.indexOf(propertyName) < 0) {
-            this._properties.push(propertyName);
-        }
-    }
     this._data.push(object);
 };
 
@@ -42,32 +37,29 @@ QSScraper.prototype.export = function(filename) {
     filename = filename || "Scraped QS _data";
     
     // this._updateProperties();
-    var csvString = new CSV.writeRows(this._data);
-    downloadFile(csv, filename + ".csv");
+    var csv = new CSVWriter()
+    if (this.exportKeys) {
+        csv.writeHeader(this.exportKeys);
+    }
+    csv.writeRows(this._data);
+    downloadFile(csv.getCSV(), filename + ".csv");
 };
 
 /**
  * Return this._data
  */
 QSScraper.prototype.getData = function() {
-    this._updateProperties();
     return this._data;
-}
+};
 
 /**
- * Updates all entries in this._data to have the same _properties
+ * Set the export keys in output file
+ * Especially useful for setting the order of the header keys
+ * 
+ * @param keyArr        array of keys, in order of export
  */
-QSScraper.prototype._updateProperties = function() {
-    for (var i = 0; i < this._data.length; i++) {
-        var entry = this._data[i];
-        for (var j = 0; j < this._properties.length; j++) {
-            var prop = this._properties[j];
-            if (!entry.hasOwnProperty(prop)) {
-                entry[prop] = "";
-            }
-        }
-    }
-    
+QSScraper.prototype.setExportKeys = function(keyArr) {
+    this.exportKeys = keyArr;
 }
 
 /**
@@ -77,7 +69,7 @@ QSScraper.prototype._updateProperties = function() {
  * @param fileBody          a string of the body of the file
  * @param filename          the filename
  */
-var downloadFile = function(fileBody, filename) {
+function downloadFile(fileBody, filename) {
    var blob = new Blob([fileBody], {type: 'text/html'});
    var url = URL.createObjectURL(blob);
    

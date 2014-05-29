@@ -22,16 +22,16 @@ QSTableIterator.prototype.SELECTOR = ".dttd:nth-child(2):visible";
 
 QSTableIterator.prototype._loop = function() {
 	this.elem.click();
-	this.superclass._loop.call(this);
+    this.superclass._loop.call(this); 
 };
 
-QSTableIterator.prototype._next = function() {
+QSTableIterator.prototype.next = function() {
     if (this.setCloseButtonText) {
         this.click(this.closeButtonText);
     } else {
         this.click("Save") || this.click("Save & Close");   
     }
-	this.superclass._next.call(this);
+	this.superclass.next.call(this);
 };
 
 /**
@@ -41,3 +41,20 @@ QSTableIterator.prototype._next = function() {
 QSTableIterator.prototype.setCloseButton = function(buttonText) {
     this.closeButtonText = buttonText;
 };
+
+/**
+ * Set the default value from the tooltip for all of the elements passed in
+ * 
+ * @param           jQuery object with collection of elements to transform
+ */
+QSTableIterator.prototype.setDefaultValue = function(collection) {
+	collection.each(function(i) {		
+		$(this).mouseover();
+		var newText = $(".tooltipWidget").text();
+		$(".tooltipWidget").mouseover();
+		newText = newText.replace(/(Default value:|\s)/g, "")
+		$(this).click()
+            .text(newText)
+	});
+    collection.blur();
+}
