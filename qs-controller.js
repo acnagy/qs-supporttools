@@ -18,8 +18,9 @@ $(window).load(function() {
             document.URL.match("smartschoolcentral.com")) {
 		injectScript("QSIterator.js");
 		injectScript("QSTableIterator.js");
+        injectScript("QSZeusIterator.js");
         injectScript("QSScraper.js");
-        injectScript("CSV.js");
+        injectScript("CSVWriter.js");
 	}
 });
 
