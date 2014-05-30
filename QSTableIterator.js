@@ -30,7 +30,14 @@ QSTableIterator.prototype.next = function() {
     if (this.closeButtonText) {
         this.click(this.closeButtonText);
     } else {
-        this.click("Save & Close") || (this.click("Save") && this.click("Close"));   
+        if (!this.click("Save & Close")) {
+            this.click("Save")
+            this.afterLoad(function() {
+                this.click("Close");
+                this.superclass.next.call(this);
+            })
+            return;
+        }
     }
 	this.superclass.next.call(this);
 };
