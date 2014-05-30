@@ -34,7 +34,7 @@ QSScraper.prototype.add = function(object) {
  * @param filename      the filename, without extension (optional)
  */
 QSScraper.prototype.export = function(filename) {    
-    filename = filename || "Scraped QS _data";
+    filename = filename || "Scraped QS data";
     
     // this._updateProperties();
     var csv = new CSVWriter()

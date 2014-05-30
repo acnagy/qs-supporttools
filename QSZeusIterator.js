@@ -2,6 +2,7 @@ function QSZeusIterator(loopFunc, useFirst, maxIters, increment) {
     ClassUtil.inherit(QSZeusIterator, this, QSTableIterator);
     this._super(loopFunc, useFirst, maxIters, increment);
     
+    openPreviewChangesRequests = 0;
     this.overrideNativeFunction(function() {
         openPreviewChangesRequests --;
     });
@@ -19,6 +20,11 @@ QSZeusIterator.prototype._loop = function() {
     })
 };
 
+QSZeusIterator.prototype.next = function() {
+    this.click("Save & Close");
+    QSIterator.prototype.next.call(this);
+}
+
 /**
  * Set the default value from the tooltip for all of the elements passed in
  * 
@@ -30,7 +36,6 @@ QSZeusIterator.prototype.setDefaultVal = function(collection, callback) {
         this.pause("Incorrect # of values found for selector: " + collection.selector);
     } else if (!collection.is(":visible")){
         this.pause("Trying to set val on invisible box: " + collection.selector)
-    }
     } else {
         collection.each(function() {		
     		$(this).mouseover();
@@ -38,12 +43,14 @@ QSZeusIterator.prototype.setDefaultVal = function(collection, callback) {
     		$(".tooltipWidget").mouseover();
             
             var match = defaultValueRegexp.exec(newText)
-            newText = match[match.length - 1];
-            if (newText !== $(this).text()) {
-        		$(this).click()
-                    .text(newText);
-                openPreviewChangesRequests ++;
-                $(this).blur();
+            if (match) {
+                newText = match[match.length - 1];
+                if (newText !== $(this).text()) {
+            		$(this).click()
+                        .text(newText);
+                    openPreviewChangesRequests ++;
+                    $(this).blur();
+                }   
             }
     	});
         this.afterLoad(callback, undefined, function() {

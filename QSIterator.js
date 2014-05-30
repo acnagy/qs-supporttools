@@ -52,6 +52,7 @@ function QSIterator(selector, loopFunc, useFirst, maxIters, increment) {
     this.loopCount = 0;
     this.elems = $(this.selector);
     this.pauseAfterFirstLoop = false;
+    qsIteratorEndNow = false;
 }
 
 /**
@@ -168,7 +169,7 @@ QSIterator.prototype.pause = function(message) {
  *
  * @param callback          the function to call - must be in this.prototype
  * @param param             param for callback
- * @param stopCondiction    function to determine whether to stop or not
+ * @param stopCondition     function to determine whether to stop or not
                                 return true to stop
  */
 QSIterator.prototype.afterLoad = function(callback, param, stopCondition) {

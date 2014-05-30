@@ -21,15 +21,16 @@ function QSTableIterator(loopFunc, useFirst, maxIters, increment) {
 QSTableIterator.prototype.SELECTOR = ".dttd:nth-child(2):visible";
 
 QSTableIterator.prototype._loop = function() {
+    alert("going to next");
 	this.elem.click();
     this.superclass._loop.call(this); 
 };
 
 QSTableIterator.prototype.next = function() {
-    if (this.setCloseButtonText) {
+    if (this.closeButtonText) {
         this.click(this.closeButtonText);
     } else {
-        this.click("Save") || this.click("Save & Close");   
+        this.click("Save & Close") || (this.click("Save") && this.click("Close"));   
     }
 	this.superclass.next.call(this);
 };
