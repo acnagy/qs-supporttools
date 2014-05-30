@@ -9,23 +9,14 @@ function QSZeusIterator(loopFunc, useFirst, maxIters, increment) {
 }
 
 QSZeusIterator.prototype._loop = function() {
-    var readyToContinue = false;
-    setTimeout(function() {
-        readyToContinue = true;
-    }, 3000);
+	this.elem.click();
     this.afterLoad(function() {
-    	this.elem.click();
         this.afterLoad(function() {
-            this.afterLoad(function() {
-                QSIterator.prototype._loop.call(this);            
-            }, undefined, function() {
-                return $(".fullPageDialogArea div:last .linkWidget:contains(Close)").length > 0;
-            });
-        });  
-    }, undefined, function() {
-        // return readyToContinue;
-        return true;
-    })
+            QSIterator.prototype._loop.call(this);            
+        }, undefined, function() {
+            return $(".fullPageDialogArea div:last .linkWidget:contains(Close)").length > 0;
+        });
+    });
 };
 
 QSZeusIterator.prototype.next = function() {
