@@ -1,8 +1,8 @@
-// 
+//
 //  QSIterator.js
 //  Rick Nagy
 //  2014-05-10
-// 
+//
 
 
 /**
@@ -50,9 +50,12 @@ function QSIterator(selector, loopFunc, useFirst, maxIters, increment) {
     this.maxIters = maxIters;
     this.currentIndex = 0 - this.increment;
     this.loopCount = 0;
+    this.intervals = [];
     this.elems = $(this.selector);
     this.pauseAfterFirstLoop = false;
     qsIteratorEndNow = false;
+    this.isChild = false;
+    this.originalDocumentTitle = document.title;
 }
 
 /**
@@ -60,12 +63,18 @@ function QSIterator(selector, loopFunc, useFirst, maxIters, increment) {
  *  since the rest is iterative.
  */
 QSIterator.prototype.start = function() {
+    this.startTime = Date.now();
     if (this.nextElem()) {
         this._loop();
     } else {
-        this.quit("No elements matching selector", false, false);
+        this.complete("Found no elements matching selector");
     }
 };
+
+QSIterator.prototype.debug = function() {
+    debugger;
+    this.start();
+}
 
 /**
  * Run this.start(), but pause before second loop
@@ -80,10 +89,12 @@ QSIterator.prototype.runOnce = function() {
  * Completion is after loopFunc on last elem OR on this.complete()
  */
 QSIterator.prototype.onComplete = function(callback) {
-    this.onCompletionCallback = callback;   
+    this.onCompletionCallback = (this.parentIterator) ?
+        callback.bind(this.parentIterator) :
+        callback;
 };
 
-/** 
+/**
  * is called to go back to the beginning of the loop
  * subclass to change what happens after being done with the current elem
  */
@@ -97,18 +108,21 @@ QSIterator.prototype.next = function() {
     });
 };
 
-/** 
+/**
  * Use to click a button on the screen, such as Save & Close
  * @param buttonTitle   the element's (button's) title/text
- * @param onlyButtons    only click buttons. Defaults to true
+ * @param onlyButtons   only click buttons. Defaults to true
  * @return boolean      whether anything that has a click event was found/clicked
  */
 QSIterator.prototype.click = function(buttonTitle, onlyButtons) {
     var selectorBase = (onlyButtons) ? "button" : "*";
-
     // output like: button:contains(Save), .allButtons:contains(Save)
-    var buttons = $(selectorBase + ":contains(" + buttonTitle + ")" +
-        ", .allbuttons" + ":contains(" + buttonTitle + ")");
+    var selector = selectorBase + ":contains(" + buttonTitle + ")" +
+        ", .allbuttons" + ":contains(" + buttonTitle + ")";
+    if (buttonTitle === "Close") {
+        selector += ":not(:contains(Save & Close))";
+    }
+    var buttons = $(selector);
     for (var i = buttons.length - 1; i >= 0; i--) {
         var button = buttons.eq(i);
         var data = button.data("events");
@@ -124,26 +138,26 @@ QSIterator.prototype.close = function() {
     this.clickAll("Cancel"); // loading dialog
     this.clickAll("Close");
     this.clickAll("Back to list");
-    qsIteratorEndNow = false;
 };
 
 QSIterator.prototype.clickAll = function(buttonTitle) {
     while (this.click(buttonTitle, false));
 };
 
-QSIterator.prototype.complete = function(reason) {
+QSIterator.prototype.complete = function(message) {
     this.clearAfterNestedLoad();
     if (this.onCompletionCallback) {
         this.onCompletionCallback();
     }
-    this.quit(reason, true, false);
+    this.quit(message, false, false);
 };
 
 QSIterator.prototype.quit = function(reason, close, isError) {
     isError = (typeof isError === "undefined") ? true : isError;
     close = (typeof close === "undefined") ? true : close;
-    
+
     this.clearAfterNestedLoad();
+    this.clearIntervals();
     if (close) {
         this.close();
     }
@@ -152,7 +166,9 @@ QSIterator.prototype.quit = function(reason, close, isError) {
     } else {
         console.log(reason);
     }
-    
+    if (!this.isChild) {
+        document.title = this.originalDocumentTitle;
+    }
 };
 
 /**
@@ -160,31 +176,32 @@ QSIterator.prototype.quit = function(reason, close, isError) {
  * Alternative to quit that doesn't close everything
  */
 QSIterator.prototype.pause = function(message) {
-    message = message ? ": " + message : ""
+    message = message ? ": " + message : "";
     this.quit("Paused" + message, false, false);
 };
 
 /**
  * call callback once the loading dialog disappears
+ * To call callback with params, bind them!
  *
  * @param callback          the function to call - must be in this.prototype
- * @param param             param for callback
  * @param stopCondition     function to determine whether to stop or not
                                 return true to stop
  */
-QSIterator.prototype.afterLoad = function(callback, param, stopCondition) {
+QSIterator.prototype.afterLoad = function(callback, stopCondition) {
     this.afterLoadHasBeenCalled = true;
-    callback = callback || function() {};
-    param = param || function() {};
+
     var loadingSelector = "*[class^='load']:visible:not(.ribbonSelectorWidget *)";
-    stopCondition = stopCondition || function() {
+    stopCondition = (stopCondition || function() {
         return $(loadingSelector).length === 0;
-    };
-    
-    var callAfterNestedLoads = function(){};
+    }).bind(this);
+
+    callback = callback || function() {};
     var callbackString = callback.toString();
+    callback = callback.bind(this);
+
+    var callAfterNestedLoads = function(){};
     if (!callbackString.match("afterLoad") &&
-            !callbackString.match("next") &&
             this.afterNestedLoadsCallback) {
         callAfterNestedLoads = this.afterNestedLoadsCallback.bind(this);
     }
@@ -195,12 +212,13 @@ QSIterator.prototype.afterLoad = function(callback, param, stopCondition) {
         if (qsIteratorEndNow) {
             clearInterval(load);
             quitFunc("Cancelled via keyboard");
-        } else if (stopCondition()) {
+        } else if (stopCondition.call()) {
             clearInterval(load);
-            callback(param);
-            callAfterNestedLoads();
+            callback();
+            // callAfterNestedLoads();
         }
     }, 10);
+    this.intervals.push(load);
 };
 
 
@@ -216,12 +234,12 @@ QSIterator.prototype.afterLoad = function(callback, param, stopCondition) {
  */
 QSIterator.prototype.withCallbackAfter = function(funcWithNesting, callbackAfter) {
     this.afterLoadHasBeenCalled = false;
-    
+
     this.afterNestedLoadsCallback = function() {
         this.clearAfterNestedLoad();
         callbackAfter.call(this);
     };
-    
+
     funcWithNesting.call(this);
     if (!this.afterLoadHasBeenCalled && this.afterNestedLoadsCallback) {
         this.afterNestedLoadsCallback();
@@ -230,6 +248,41 @@ QSIterator.prototype.withCallbackAfter = function(funcWithNesting, callbackAfter
 
 QSIterator.prototype.clearAfterNestedLoad = function() {
     this.afterNestedLoadsCallback = null;
+};
+
+/**
+ * Clear any outstanding timers
+ */
+QSIterator.prototype.clearIntervals = function() {
+    this.intervals.forEach(clearInterval);
+};
+
+/**
+ * Add a child Iterator and start it, then call a callback on completion
+ * kinda like afterLoad, but instead of a load a child iter is called.
+ * Do NOT run multiple children in parallel!
+ *
+ * @param callback          callback when child finishes
+ * @param otherIterator     the other QSIterator
+ */
+QSIterator.prototype.afterChildIterator = function(callback, childIter) {
+    callback = (callback || function(){}).bind(this);
+    this.currentChild = childIter;
+
+    this.currentChild.parentIterator = this;
+    this.currentChild.isChild = true;
+    this.childComplete = false;
+    this.currentChild.onComplete(function() {
+        this.childComplete = true;
+        this.currentChild = null;
+    });
+
+    this.afterLoad(function() {
+        callback();
+    }, function() {
+        return this.childComplete;
+    });
+    this.currentChild.start();
 };
 
 /**
@@ -242,22 +295,45 @@ QSIterator.prototype._loop = function() {
     } else {
         this.afterLoad(function() {
             this.loopCount ++;
-            this.withCallbackAfter(this.loopFunc, this.next);
+            if (!this.isChild) {
+                this.updateStatus();
+            }
+            this.loopFunc();
+            // this.withCallbackAfter(this.loopFunc, this.next);
         });
     }
 };
 
+QSIterator.prototype.updateStatus = function() {
+    var elapsed = (Date.now() - this.startTime) / 1000;
+    var leftSeconds = ((this.elems.length * elapsed) / this.loopCount) - elapsed;
+    var hours = Math.floor(leftSeconds / 3600);
+    var minutes = Math.floor((leftSeconds % 3600) / 60);
+    var seconds =  Math.round(leftSeconds - (hours * 3600 + minutes * 60));
+    var leftArray = hours ? [hours, minutes, seconds] : [minutes, seconds];
+    leftArray.forEach(function(i, elem, elems) {
+        elem = (elem < 10) ? "0" + elem : elem;
+    })
+    var leftString = leftArray.join(":");
+
+    var progress = Math.round((this.loopCount / this.elems.length) * 1000) / 10;
+    var iterStatus = "Left: " + leftString + ", Done: " + progress;
+
+    console.log("Status:" + iterStatus);
+    document.title = iterStatus;
+};
+
 /**
  * set this.elem to the next elem or trigger end condition
- * 
+ *
  * @return boolean whether or not there was another elem to select
  */
 QSIterator.prototype.nextElem = function() {
-    this.currentIndex = (this.useFirst) ? 0 : this.currentIndex + this.increment;
-    if (this.currentIndex < this.elems.length &&
+    this.currentIndex ++;
+    if ((this.useFirst || this.currentIndex < this.elems.length) &&
             (this.maxIters === undefined || this.currentIndex < this.maxIters)) {
         this.elems = $(this.selector);  // always refresh the elems
-        this.elem = this.elems.get(this.currentIndex);
+        this.elem = this.elems.eq(this.currentIndex);
         return true;
     } else {
         return false;
@@ -271,9 +347,10 @@ function qsAfterLoad(callback, param) {
         if (!$("*[class^='load']:visible:not(.ribbonSelectorWidget *)").length) {
             clearInterval(load);
             callback(param);
-        } 
+        }
     }, 10);
 }
+
 
 /* loads on all pages for cancelling QSIterator loops */
 qsIteratorEndNow = false;

@@ -57,8 +57,10 @@
         "QSIterator.js",
 		"QSTableIterator.js",
         "QSZeusIterator.js",
+        "QSGradebookIterator.js",
         "QSScraper.js",
         "CSVWriter.js",
+        "extend.js",
         "libraries/json2csv.js"
     ]
 }

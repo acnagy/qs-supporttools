@@ -1,8 +1,8 @@
-// 
+//
 //  qs-controller.js
 //  Rick Nagy
 //  2014-05-07
-// 
+//
 
 /* controls other scripts in qs-supporttools
  * currently only loads QSIterator.js
@@ -20,6 +20,8 @@ $(window).load(function() {
 		injectScript("QSTableIterator.js");
         injectScript("QSZeusIterator.js");
         injectScript("QSScraper.js");
+        injectScript("QSGradebookIterator.js");
+        injectScript("extend.js");
         injectScript("CSVWriter.js");
 	}
 });
