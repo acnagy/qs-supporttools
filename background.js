@@ -1,8 +1,8 @@
-// 
+//
 //  background.js
 //  Rick Nagy
 //  2014-04-23
-// 
+//
 
 // goo.gl/CevJ6G
 Array.prototype.getUnique = function() {
@@ -23,14 +23,11 @@ Array.prototype.match = function(toMatch) {
 		if (toMatch.indexOf(this[i]) > -1) matchedArray.push(this[i]);
 	}
 	return matchedArray;
-} 
+}
 
 String.prototype.contains = function(searchString) {
     return (this.indexOf(searchString) > -1);
 }
-
-// run every time page loads
-chrome.tabs.executeScript(null, {file: "QSIterator.js"});
 
 // =====================================================================
 // = Either get online trial schools or parse trial schools on Control =
@@ -39,13 +36,13 @@ chrome.tabs.executeScript(null, {file: "QSIterator.js"});
 // Called when the user clicks on the page action.
 chrome.pageAction.onClicked.addListener(function(tab) {
 	var title = chrome.pageAction.getTitle({'tabId' : tab.id}, function(){});
-	if (isOutreachReport(tab.url)) parseSchoolcodes(tab);	
+	if (isOutreachReport(tab.url)) parseSchoolcodes(tab);
 	else if (isZopim(tab.url)) parseZopim(tab);
 });
 
 function switchToPageURL(tab) {
 	chrome.tabs.update(tab.id, {'url' : 'https://dashboard.zopim.com/#Visitor_List/page_url'}, function() {
-		parseZopim(tab);	
+		parseZopim(tab);
 	});
 }
 
@@ -60,11 +57,11 @@ function parseZopim(tab) {
 				switchToPageURL(tab);
 			return;
 		}
-		
+
 		var lines = response.data.split('\n');
-		
+
 		if (lines)
-		
+
 		var urls = [];
 		for (var i = 0; i < lines.length; i++) {
 			// is a url line
@@ -82,11 +79,11 @@ function parseZopim(tab) {
 				alert("Please go to Control and run this script on a CSO report before looking for prospect schools on Zopim.");
 				return;
 			}
-			
+
 			var alertText = '';
 			var schoolCodes = response.QSSchoolCodes;
 			if (typeof schoolCodes === 'undefined' || schoolCodes.length === 0) {
-				alertText = "There are no trial schools on file. Go to Control --> Reports --> Customer Outreach and click on the QuickSchools icon to save all of the trial schools to match here."; 
+				alertText = "There are no trial schools on file. Go to Control --> Reports --> Customer Outreach and click on the QuickSchools icon to save all of the trial schools to match here.";
 			} else {
 				var onlineSchools = urls.getUnique().match(response.QSSchoolCodes);
 				var prospectSchols = urls.match(['www']);
@@ -97,16 +94,16 @@ function parseZopim(tab) {
 					for (var i = 0; i !== onlineSchools.length; i++) {
 						alertText += '\n' + onlineSchools[i];
 					}
-					
+
 				}
-				
+
 				if (prospectSchols.length !== 0) {
 					if (prospectSchols.length === 1) alertText += '\n\nThere is also a prospect user';
 					else alertText += '\n\nThere are also ' + prospectSchols.length + ' prospect users';
 				} else {
 					alertText += '\n\nThere are no prospect users';
 				}
-				
+
 				alertText +=  ' on the QuickSchools homepage (www.quickschools.com/*).';
 				alertText += '\n\nBe sure to refresh the trial school list daily by clicking on the QS icon from the Customer Outreach reports.'
 			}
@@ -124,7 +121,7 @@ function isZopim(url) {
 }
 
 function isOutreachReport(url) {
-    return url.match("Customer%20Outreach") != null; 
+    return url.match("Customer%20Outreach") != null;
 }
 
 // Listen for any changes to the URL of any tab.
@@ -146,7 +143,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                 'title' : 'Find Online Trial Schools'
             });
     		chrome.pageAction.show(tabId)
-    	}   
+    	}
     }
 });
 
@@ -175,7 +172,7 @@ function parseSchoolcodes(tab) {
 			for (var i = 0; i < rows.length; i++) {
 				var columns = rows[i].split('\t');
 				var col = 0;
-	
+
 				// filter for header columns
 				if (columns.length > 5) {
 					// move left to right to find the schoolcode
@@ -183,7 +180,7 @@ function parseSchoolcodes(tab) {
 					codes.push(columns[col]);
 				}
 			}
-			
+
 			saveSchoolCodes(codes);
 		}
 	});

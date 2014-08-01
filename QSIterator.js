@@ -55,6 +55,7 @@ function QSIterator(selector, loopFunc, useFirst, maxIters, increment) {
     this.pauseAfterFirstLoop = false;
     qsIteratorEndNow = false;
     this.isChild = false;
+    this.makeUpdates = true;
     this.originalDocumentTitle = document.title;
 }
 
@@ -74,7 +75,7 @@ QSIterator.prototype.start = function() {
 QSIterator.prototype.debug = function() {
     debugger;
     this.start();
-}
+};
 
 /**
  * Run this.start(), but pause before second loop
@@ -191,9 +192,12 @@ QSIterator.prototype.pause = function(message) {
 QSIterator.prototype.afterLoad = function(callback, stopCondition) {
     this.afterLoadHasBeenCalled = true;
 
-    var loadingSelector = "*[class^='load']:visible:not(.ribbonSelectorWidget *)";
+    var loadingSelector = "*[class^='load']:not(.ribbonSelectorWidget *):not(button>span.loading-section):visible:";
+    // TODO: try using :hidden here?
     stopCondition = (stopCondition || function() {
-        return $(loadingSelector).length === 0;
+        return $(loadingSelector).filter(function() {
+            return $(this).height() > 0 && $(this).width() > 0;
+        }).length === 0;
     }).bind(this);
 
     callback = callback || function() {};
@@ -271,6 +275,7 @@ QSIterator.prototype.afterChildIterator = function(callback, childIter) {
 
     this.currentChild.parentIterator = this;
     this.currentChild.isChild = true;
+    this.currentChild.makeUpdates = false;
     this.childComplete = false;
     this.currentChild.onComplete(function() {
         this.childComplete = true;
@@ -295,8 +300,8 @@ QSIterator.prototype._loop = function() {
     } else {
         this.afterLoad(function() {
             this.loopCount ++;
-            if (!this.isChild) {
-                this.updateStatus();
+            if (this.makeUpdates) {
+                this.statusUpdate();
             }
             this.loopFunc();
             // this.withCallbackAfter(this.loopFunc, this.next);
@@ -304,23 +309,29 @@ QSIterator.prototype._loop = function() {
     }
 };
 
-QSIterator.prototype.updateStatus = function() {
+QSIterator.prototype.statusUpdate = function() {
+    var iterStatus = this.statusString();
+    console.log("Status:" + iterStatus);
+    document.title = iterStatus;
+};
+
+QSIterator.prototype.statusString = function() {
     var elapsed = (Date.now() - this.startTime) / 1000;
-    var leftSeconds = ((this.elems.length * elapsed) / this.loopCount) - elapsed;
+    var totalCount = this.maxIters || this.elems.length;
+    var leftSeconds = ((totalCount * elapsed) / this.loopCount) - elapsed;
+
     var hours = Math.floor(leftSeconds / 3600);
     var minutes = Math.floor((leftSeconds % 3600) / 60);
     var seconds =  Math.round(leftSeconds - (hours * 3600 + minutes * 60));
+
     var leftArray = hours ? [hours, minutes, seconds] : [minutes, seconds];
-    leftArray.forEach(function(i, elem, elems) {
-        elem = (elem < 10) ? "0" + elem : elem;
-    })
+    leftArray.forEach(function(elemVal, i, elems) {
+        elems[i] = (elemVal < 10 && i > 0) ? "0" + elemVal : elemVal;
+    });
     var leftString = leftArray.join(":");
 
-    var progress = Math.round((this.loopCount / this.elems.length) * 1000) / 10;
-    var iterStatus = "Left: " + leftString + ", Done: " + progress;
-
-    console.log("Status:" + iterStatus);
-    document.title = iterStatus;
+    var progress = Math.round((this.loopCount / totalCount) * 1000) / 10;
+    return "Left: " + leftString + ", Done: " + progress + "%";
 };
 
 /**
@@ -340,6 +351,74 @@ QSIterator.prototype.nextElem = function() {
     }
 };
 
+// ====================
+// = Static Functions =
+// ====================
+
+/**
+ * Get a QueryPanel input box by label
+ *
+ * @param label QueryPanel label
+ * @param firstOnly: return the first result and ignore any warnings of mulitple
+ *  labels
+ * @return jQuery object of the input
+ */
+QSIterator.qpInputByLabel = function(label, firstOnly) {
+    firstOnly = firstOnly || true;
+    var qpInput = $(".tableLabel:contains(" + label + "):visible")
+        .next(".tableValue")
+        .find("div:nth-child(1)")
+        .find("input,select,textarea");
+    if (qpInput.length === 1 || firstOnly) {
+        return qpInput.first();
+    } else {
+        console.warn("Incorrect number of elems:", qpInput.length, "found for label: ", label, qpInput);
+        return null;
+    }
+};
+
+/**
+ * Set a QueryPanel val by label
+ * @param label the QueryPanel label
+ * @param val   the val to set
+ */
+QSIterator.setQPVal = function(label, val) {
+    var qpInput = QSIterator.qpInputByLabel(label);
+    if (qpInput) {
+        if (qpInput.is("select") && !qpInput.html().match(val)) {
+            console.warn("Tried to set invalid val:", val, "on select from QP label:", label, qpInput);
+        } else if (qpInput.parents(".easySelectorWidget").length) {
+            qpInput.parents(".item").find(".delete").click();
+            qpInput.next(".resultsHolder")
+                .find("li:contains(" + val + ")")
+                .click();
+        } else {
+            qpInput.click();
+            qpInput.focus();
+            qpInput.val(val);
+            qpInput.blur();
+        }
+        if (qpInput.find(".hasDatepicker")) {
+            $("#ui-datepicker-div").hide()
+        }
+    }
+};
+
+/**
+ * Clicks the "delete" button for elements (such as criteria values)
+ * that are deleted with a hovering blue X.
+ *
+ * @param elem  the elem to hover over
+ */
+QSIterator.clickHoverDelete = function(elem) {
+    if (elem.length !== 1) {
+        console.warn("Wrong number of elems passed to clickHoverDelete", elem);
+        return;
+    }
+    elem.mouseover();
+    $(".iconHolder:last").click();
+};
+
 /* static version of afterLoad for external use
  * TODO: merge this into a single function with afterLoad */
 function qsAfterLoad(callback, param) {
@@ -348,7 +427,7 @@ function qsAfterLoad(callback, param) {
             clearInterval(load);
             callback(param);
         }
-    }, 10);
+    }, 100);
 }
 
 

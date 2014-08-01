@@ -26,7 +26,7 @@
             "js": [
                 "qs-supporttools.js",
                 "libraries/jquery.js",
-                "qs-controller.js"
+                "qs-supporttools-bootstrap.js"
             ],
             "matches": [
                 "http://*/*",
@@ -54,11 +54,13 @@
     "short_name": "QS Tools",
     "version": "1.33.3",
     "web_accessible_resources": [
+        "injectScripts.js",
         "QSIterator.js",
-		"QSTableIterator.js",
+    		"QSTableIterator.js",
         "QSZeusIterator.js",
         "QSGradebookIterator.js",
         "QSScraper.js",
+        "QSImporter.js",
         "CSVWriter.js",
         "extend.js",
         "libraries/json2csv.js"

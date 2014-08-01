@@ -27,6 +27,7 @@ function QSScraper(exportKeys) {
  */
 QSScraper.prototype.add = function(object) {
     this._data.push(object);
+    console.log("Added data to a QSScraper", object)
 };
 
 /**
@@ -60,7 +61,7 @@ QSScraper.prototype.getData = function() {
  * @param exportKeys        array of keys, in order of export
  */
 QSScraper.prototype.setExportKeys = function(exportKeys) {
-    this.exportKeys = keyArr;
+    this.exportKeys = exportKeys;
 }
 
 /**

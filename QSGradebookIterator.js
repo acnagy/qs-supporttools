@@ -1,13 +1,13 @@
-// 
+//
 //  QSGradebookIterator.js
 //  Rick Nagy (@br1ckb0t)
 //  2014-06-05
-// 
+//
 
 /**
  * Extends QSIterator
  * iterates through each Gradebook for each teacher/semester
- * 
+ *
  * @param loopFunc		the code to run in each entry after load
  */
 
@@ -27,30 +27,32 @@ QSGradebookIterator.prototype._loop = function() {
     var COURSE_OPTIONS_SELECTOR = COURSE_DROPDOWN_SELECTOR +  " option";
     var courseLoopFunc = this.loopFunc.bind(this);
     this.id = "teacher";
-    
-    var START_TEACHER = "Rebeca";
-    if (!this.hasSeenStart && !this.elem.text().match(START_TEACHER)) {
-        this.next();
-        return;
-    } else if (this.elem.text().match(START_TEACHER)) {
-        this.hasSeenStart = true;
-    }
-    
+
     // elem is a teacher in the teacher dropdown
+    var startTeacher = "Marisa Alvarez"
+
+    if (this.elem.text().match(startTeacher)) {
+        this.seenStart = true;
+    } else if (!this.seenStart) {
+        console.log("next");
+        this.next();
+        return
+    }
+
     var teacherDropdown = $(this.TEACHER_DROPDOWN_SELECTOR);
     teacherDropdown.val(this.elem.text());
-    new Notification("Starting: " + this.elem.text());
+    // new Notification("Starting: " + this.elem.text());
     teacherDropdown.change();
-    
+
     this.afterLoad(function() {
         var iter = new QSIterator(SEMESTER_OPTIONS_SELECTOR, function() {
             this.id = "semester";
             var semesterDropdown = $(SEMESTER_DROPDOWN_SELECTOR);
-            if (this.elem.text().match("2013/2014, Third Term")
-                    || this.elem.text().match("2013/2014, Fourth Term")) {
+            if (!this.elem.text().match("Spring 2014 3")) {
                 this.next();
-                return;        
+                return;
             }
+
             semesterDropdown.val(this.elem.text());
             semesterDropdown.change();
             this.afterLoad(function() {

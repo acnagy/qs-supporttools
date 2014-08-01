@@ -27,43 +27,61 @@ QSZeusIterator.prototype.next = function() {
 /**
  * Set the default value from the tooltip for all of the elements passed in
  *
- * @param           jQuery object with collection of elements to transform
+ * @param   textField       text field to set default val on
+ * @param   callback        callback to call once exec can continue
+                                will be called whether textfield is changed or not
  */
-QSZeusIterator.prototype.setDefaultVal = function(collection, callback) {
-	var defaultValueRegexp = /(Default|Current) value: (.*)/g;
-    if (collection.length !== 1) {
-        this.pause("Incorrect # of values found for selector: " + collection.selector);
-    } else if (!collection.is(":visible")){
-        this.pause("Trying to set val on invisible box: " + collection.selector)
-    } else {
-        var madeChange = false;
-        collection.each(function() {
-    		$(this).mouseover();
-    		var newText = $(".tooltipWidget").text();
-    		$(".tooltipWidget").mouseover();
-
-            var match = defaultValueRegexp.exec(newText)
-            if (match) {
-                newText = match[match.length - 1];
-                if (newText !== $(this).text()) {
-            		$(this).click()
-                        .text(newText);
-                    openPreviewChangesRequests ++;
-                    $(this).blur();
-                    madeChange = true;
-                }
-            }
-    	});
-        this.afterLoad(callback, undefined, function() {
-            return openPreviewChangesRequests <= 0;
-        });
-        return madeChange;
+QSZeusIterator.prototype.setZeusDefaultVal = function(textField, callback) {
+    if (this.checkQueryForChangeZeusAnswer(textField)) {
+        var defaultValueRegexp = /(Default|Current) value: (.*)/g;
+        textField.mouseover();
+        var newText = $(".tooltipWidget").text();
+        $(".tooltipWidget").mouseover();
+        match = defaultValueRegexp.exec(newText);
+        if (match) {
+            newText = match[match.length - 1];
+            return this.setZeusAnswer(textField, newText, callback);
+        }
     }
+    callback();
+    return false;
 };
 
+QSZeusIterator.prototype.checkQueryForChangeZeusAnswer = function(query) {
+    if (query.length !== 1) {
+        this.pause("Incorrect # of values found for selector: " + query.selector + ". Is " + query.length + ", should be 1.");
+        return false;
+    } else if (!query.is(":visible")){
+        this.pause("Trying to set val on invisible box: " + query.selector);
+        return false;
+    }
+    return true;
+}
+
+QSZeusIterator.prototype.setZeusAnswer = function(textField, newText, callback) {
+    if (this.checkQueryForChangeZeusAnswer(textField)) {
+        if (textField.text() === newText) {
+            console.warn("Setting identical val: " + newText + " on text field", textField)
+        }
+    	textField.click().text(newText);
+        this.registerZeusChange();
+        console.log("QSZeusIterator Set value " + newText + " on text field", textField)
+        textField.blur();
+        this.afterZeusLoad(callback);
+        return true;
+    }
+    callback();
+    return false;
+}
+
+QSZeusIterator.prototype.registerZeusChange = function() {
+    openPreviewChangesRequests ++;
+}
+
 QSZeusIterator.prototype.afterZeusLoad = function(callback) {
-    callback = callback.bind(this);
-    this.afterLoad()
+    this.afterLoad(callback, function() {
+        return openPreviewChangesRequests <= 0;
+    });
 }
 
 /**
@@ -83,7 +101,7 @@ QSZeusIterator.prototype.overrideNativeFunction = function(newFunc) {
     EditZeusReportCard.prototype.retrievedChanges = (function() {
        var original = EditZeusReportCard.prototype.retrievedChanges;
        return function() {
-           console.log("report card data: ", this.reportCardData);
+           log("Report card data", this.reportCardData)
            var ret = original.apply(this, arguments);
            newFunc.call(iterator);
            return ret;
