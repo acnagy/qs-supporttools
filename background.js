@@ -38,6 +38,10 @@ chrome.pageAction.onClicked.addListener(function(tab) {
 	var title = chrome.pageAction.getTitle({'tabId' : tab.id}, function(){});
 	if (isOutreachReport(tab.url)) parseSchoolcodes(tab);
 	else if (isZopim(tab.url)) parseZopim(tab);
+    else if (isNewZDTicketPage(tab.url)) {
+        console.log("sending chat bubbles");
+        chrome.tabs.sendMessage(tab.id, {"method": "chatBubbles"});
+    }
 });
 
 function switchToPageURL(tab) {
@@ -116,6 +120,10 @@ function isOldZendesk(url) {
     return url.match(".com/tickets/") != null;
 }
 
+function isNewZDTicketPage(url) {
+    return url.match("agent/#/tickets/") != null;
+}
+
 function isZopim(url) {
     return url.match("dashboard.zopim.com") != null;
 }
@@ -133,8 +141,8 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
             redirectToNewZD(tab);
         } else if (isOutreachReport(url)) {
     		chrome.pageAction.setTitle({
-                    'tabId' : tabId,
-                    'title' : 'QS Support Tools'
+                'tabId' : tabId,
+                'title' : 'QS Support Tools'
             });
     	    chrome.pageAction.show(tabId);
     	} else if (isZopim(url)) {
@@ -143,6 +151,12 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
                 'title' : 'Find Online Trial Schools'
             });
     		chrome.pageAction.show(tabId)
+    	} else if (isNewZDTicketPage(url)) {
+    	    chrome.pageAction.setTitle({
+    	        'tabId': tabId,
+                'title': 'Show Chat Bubbles'
+    	    });
+            chrome.pageAction.show(tabId)
     	}
     }
 });

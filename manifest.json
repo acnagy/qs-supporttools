@@ -26,7 +26,11 @@
             "js": [
                 "qs-supporttools.js",
                 "libraries/jquery.js",
-                "qs-supporttools-bootstrap.js"
+                "qs-supporttools-bootstrap.js",
+                "chatbubbles.js"
+            ],
+            "css": [
+                "chatbubbles.css"
             ],
             "matches": [
                 "http://*/*",
