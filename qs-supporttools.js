@@ -10,6 +10,8 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 	} else if (message.method === "copyTicketNumber") {
         ticket = getTicketNumber();
         sendResponse(ticket);
+	} else if (message.method === "getUrl") {
+	    sendResponse(document.URL);
 	}
 });
 

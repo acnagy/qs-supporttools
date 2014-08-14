@@ -152,12 +152,14 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
             });
     		chrome.pageAction.show(tabId)
     	} else if (isNewZDTicketPage(url)) {
-    	    chrome.pageAction.setTitle({
-    	        'tabId': tabId,
-                'title': 'Show Chat Bubbles'
-    	    });
-            chrome.pageAction.show(tabId)
+    	    chrome.tabs.sendMessage(tabId, {"method": "chatBubbles"});
     	}
+    } else if (changeInfo.status === "complete") {
+        chrome.tabs.sendMessage(tabId, {"method": "getUrl"}, function(response) {
+            if (isNewZDTicketPage(response)) {
+                chrome.tabs.sendMessage(tabId, {"method": "chatBubbles"});
+            }
+        });
     }
 });
 
