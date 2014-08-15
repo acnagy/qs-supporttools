@@ -280,12 +280,7 @@ QSIterator.prototype.afterChildIterator = function(callback, childIter) {
     this.currentChild.onComplete(function() {
         this.childComplete = true;
         this.currentChild = null;
-    });
-
-    this.afterLoad(function() {
         callback();
-    }, function() {
-        return this.childComplete;
     });
     this.currentChild.start();
 };
