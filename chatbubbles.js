@@ -1,7 +1,7 @@
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.method === "chatBubbles") {
         var interval = setInterval(function() {
-            var unparsedChats = $(".comment:visible:contains(Chat started on)").not(".parsed-chat");
+            var unparsedChats = findUnparsedChats();
             if (unparsedChats.length) {
                 unparsedChats.each(function() {
                     $(this).addClass("parsed-chat")
@@ -13,6 +13,12 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         });
     }
 });
+
+function findUnparsedChats() {
+    return $(".comment:visible:not(.parsed-chat)").filter(function() {
+        return $(this).text().match(/\(\d\d:\d\d:\d\d [A|P]M\) /g);
+    })
+}
 
 function convertChatToBubbles(chat) {
     var chatBody = chat.children("p:not(:contains(was closed and merged into this request))");
