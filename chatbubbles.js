@@ -1,5 +1,6 @@
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.method === "chatBubbles") {
+        console.log("Begin searching for chats to replace.");
         var interval = setInterval(function() {
             var unparsedChats = findUnparsedChats();
             if (unparsedChats.length) {

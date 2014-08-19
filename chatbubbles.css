@@ -79,3 +79,13 @@
 .event:not(.is-public) .conversation .bubble {
   border-color: #bbb;
 }
+
+@media all and (max-width: 800px) {
+    .pane.left {
+        display: none;
+    }
+    
+    #main_panes .split_pane.ticket .pane.right {
+        left: 59px;
+    }
+}
