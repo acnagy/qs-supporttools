@@ -111,24 +111,38 @@ QSIterator.prototype.next = function() {
 
 /**
  * Use to click a button on the screen, such as Save & Close
- * @param buttonTitle   the element's (button's) title/text
+ * @param buttonTitle   the element's (button's) title/text. This can be an
+ *      array of titles to try in order of priority. So,
+ *      ["Save & Close", "Save"] will try to click a button entitled
+ *      "Save & Close", and then if there isn't a "Save & Close" button it'll
+ *      try "Save".
  * @param onlyButtons   only click buttons. Defaults to true
  * @return boolean      whether anything that has a click event was found/clicked
  */
 QSIterator.prototype.click = function(buttonTitle, onlyButtons) {
-    var selectorBase = (onlyButtons) ? "button" : "*";
-    // output like: button:contains(Save), .allButtons:contains(Save)
-    var selector = selectorBase + ":contains(" + buttonTitle + ")" +
-        ", .allbuttons" + ":contains(" + buttonTitle + ")";
-    if (buttonTitle === "Close") {
-        selector += ":not(:contains(Save & Close))";
+    var tryTitle = function(title) {
+        // output like: button:contains(Save), .allButtons:contains(Save)
+        var selector = selectorBase + ":contains(" + title + ")" +
+            ", .allbuttons" + ":contains(" + title + ")";
+        if (title === "Close") {
+            selector += ":not(:contains(Save & Close))";
+        }
+        var buttons = $(selector);
+        for (var i = buttons.length - 1; i >= 0; i--) {
+            var button = buttons.eq(i);
+            var data = button.data("events");
+            if (data !== undefined && data.click !== undefined) {
+                button.click();
+                return true;
+            }
+        }
+        return false;
     }
-    var buttons = $(selector);
-    for (var i = buttons.length - 1; i >= 0; i--) {
-        var button = buttons.eq(i);
-        var data = button.data("events");
-        if (data !== undefined && data.click !== undefined) {
-            button.click();
+    var buttonTitles = Array.isArray(buttonTitle) ? buttonTitle : [buttonTitle];
+    var selectorBase = (onlyButtons) ? "button" : "*";
+    for (var i = 0; i < buttonTitles.length; i++) {
+        var clicked = tryTitle(buttonTitles[i]);
+        if (clicked) {
             return true;
         }
     }
@@ -388,10 +402,11 @@ QSIterator.setQPVal = function(label, val) {
                 .find("li:contains(" + val + ")")
                 .click();
         } else {
-            qpInput.click();
-            qpInput.focus();
-            qpInput.val(val);
-            qpInput.blur();
+            qpInput.click()
+                .focus()
+                .val(val)
+                .blur()
+                .change();
         }
         if (qpInput.find(".hasDatepicker")) {
             $("#ui-datepicker-div").hide()
