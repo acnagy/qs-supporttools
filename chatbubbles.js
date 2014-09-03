@@ -65,10 +65,10 @@ function makeBubbles(messages, conversationWrapper) {
         } else if (message.match("Chat started on")) {
             appendNote(message, conversationWrapper);
         } else {
-            var rightBubble = $(conversationWrapper)
-                .find(".bubble:last")
-                .is(":.bubble-alt");
-            appendMessage("", "", message, false, conversationWrapper, rightBubble);
+            // append to last bubble if doesn't match any regex, since that's
+            // probably a newline in the original message.
+            var lastBubble = $(conversationWrapper).find(".bubble:last");
+            $("<p/>").text(message).appendTo(lastBubble);
         }
     });
 }
@@ -82,12 +82,16 @@ function appendNote(noteText, conversationWrapper) {
 
 
 function appendMessage(timestamp, sender, messageText, showTimestamp, conversation, isQSAgent) {
+    messageText = messageText.trim();
+    sender = sender.trim();
+    if (messageText === "") return;
+    
     if (showTimestamp) {
         $("<p/>", {"class": "datestamp"})
             .text(timestamp)
             .appendTo(conversation);
     }
-    
+
     isQSAgent = isQSAgent || nameIsQSAgent(sender);
     var bubbleClass = isQSAgent ? "bubble bubble-alt yellow" : "bubble green";
     var newBubble = $("<div/>", {
@@ -96,8 +100,11 @@ function appendMessage(timestamp, sender, messageText, showTimestamp, conversati
     });
     newBubble.text(messageText)
         .addClass(bubbleClass);
-    var senderSpan = $("<span/>", {"class": "sender"}).text(sender + ": ");
-    newBubble.prepend(senderSpan);
+
+    if (sender !== "") {
+        var senderSpan = $("<span/>", {"class": "sender"}).text(sender + ": ");
+        newBubble.prepend(senderSpan);
+    }
     newBubble.appendTo(conversation);
 }
 
