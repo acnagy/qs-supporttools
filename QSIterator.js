@@ -370,15 +370,22 @@ QSIterator.prototype.nextElem = function() {
  * @param label QueryPanel label
  * @param firstOnly: return the first result and ignore any warnings of mulitple
  *  labels
+ * @param allowMultiple: allow multiple elems to be returned. this overrides
+ *      firstOnly.
  * @return jQuery object of the input
+ * 
+ * to get ALL the matching inputs by label, call like this:
+ *      QSIterator.qpInputByLabel("labelText", false, true);
  */
-QSIterator.qpInputByLabel = function(label, firstOnly) {
+QSIterator.qpInputByLabel = function(label, firstOnly, allowMultiple) {
     firstOnly = firstOnly || true;
     var qpInput = $(".tableLabel:contains(" + label + "):visible")
         .next(".tableValue")
         .find("div:nth-child(1)")
         .find("input,select,textarea");
-    if (qpInput.length === 1 || firstOnly) {
+    if (allowMultiple) {
+        return qpInput;
+    } else if (qpInput.length === 1 || firstOnly) {
         return qpInput.first();
     } else {
         console.warn("Incorrect number of elems:", qpInput.length, "found for label: ", label, qpInput);
