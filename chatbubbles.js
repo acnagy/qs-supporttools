@@ -1,3 +1,7 @@
+QS_AGENTS = ["Anna", "Azroy", "Elisabeth", "Rick", "Victor", "Azreen", "Ben",
+        "Bernadette", "Elka", "Emily", "Ezekiel", "Marsha", "Regie", "Tina",
+        "Rachel", "Chrissy"];
+
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.method === "chatBubbles") {
         console.log("Begin searching for chats to replace.");
@@ -109,9 +113,8 @@ function appendMessage(timestamp, sender, messageText, showTimestamp, conversati
 }
 
 function nameIsQSAgent(sender) {
-    var qsAgents = ["Anna", "Azroy", "Elisabeth", "Rick", "Victor", "Azreen", "Ben", "Bernadette", "Elka", "Emily", "Ezekiel", "Marsha", "Regie"];
-    for (var i = 0; i < qsAgents.length; i++) {
-        if (sender.match(qsAgents[i])) {
+    for (var i = 0; i < QS_AGENTS.length; i++) {
+        if (sender.match(QS_AGENTS[i])) {
             return true;
         }
     }

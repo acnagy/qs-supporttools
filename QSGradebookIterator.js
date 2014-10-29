@@ -8,7 +8,7 @@
  * Extends QSIterator
  * iterates through each Gradebook for each teacher/semester
  *
- * @param loopFunc		the code to run in each entry after load
+ * @param loopFunc        the code to run in each entry after load
  */
 
 function QSGradebookIterator(loopFunc) {

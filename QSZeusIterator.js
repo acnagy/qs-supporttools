@@ -9,7 +9,7 @@ function QSZeusIterator(loopFunc, useFirst, maxIters, increment) {
 }
 
 QSZeusIterator.prototype._loop = function() {
-	this.elem.click();
+    this.elem.click();
     this.afterLoad(function() {
         this.afterLoad(function() {
             QSIterator.prototype._loop.call(this);
@@ -63,7 +63,7 @@ QSZeusIterator.prototype.setZeusAnswer = function(textField, newText, callback) 
         if (textField.text() === newText) {
             console.warn("Setting identical val: " + newText + " on text field", textField)
         }
-    	textField.click().text(newText);
+        textField.click().text(newText);
         this.registerZeusChange();
         console.log("QSZeusIterator Set value " + newText + " on text field", textField)
         textField.blur();

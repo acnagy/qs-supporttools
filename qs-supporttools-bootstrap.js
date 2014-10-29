@@ -10,7 +10,7 @@
  */
 
 $("head").append(
-	$("<script src='" + chrome.extension.getURL("injectScripts.js") + "'></script>")
+    $("<script src='" + chrome.extension.getURL("injectScripts.js") + "'></script>")
 );
 
 document.addEventListener('injectQSSupportToolsScripts', function() {
@@ -19,12 +19,12 @@ document.addEventListener('injectQSSupportToolsScripts', function() {
 
 var injectQSSupportToolsScripts = function() {
     var injectScript = function(filename) {
-    	$("head").append(
-    		$("<script src='" + chrome.extension.getURL(filename) + "'></script>")
-    	);
+        $("head").append(
+            $("<script src='" + chrome.extension.getURL(filename) + "'></script>")
+        );
     }
-	injectScript("QSIterator.js");
-	injectScript("QSTableIterator.js");
+    injectScript("QSIterator.js");
+    injectScript("QSTableIterator.js");
     injectScript("QSZeusIterator.js");
     injectScript("QSScraper.js");
     injectScript("QSGradebookIterator.js");

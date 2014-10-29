@@ -5,14 +5,14 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         if (!answerChat()){
             openUnreadChat();
         }
-	} else if (message.method === "getText") {
-		sendResponse({data: document.documentElement.innerText, method:"getText"});
-	} else if (message.method === "copyTicketNumber") {
+    } else if (message.method === "getText") {
+        sendResponse({data: document.documentElement.innerText, method:"getText"});
+    } else if (message.method === "copyTicketNumber") {
         ticket = getTicketNumber();
         sendResponse(ticket);
-	} else if (message.method === "getUrl") {
-	    sendResponse(document.URL);
-	}
+    } else if (message.method === "getUrl") {
+        sendResponse(document.URL);
+    }
 });
 
 function answerChat() {
