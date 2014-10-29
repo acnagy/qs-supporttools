@@ -34,8 +34,8 @@ QSTableIterator.prototype.next = function(save) {
     if (this.closeButtonText) {
         this.click(this.closeButtonText);
     } else if (save) {
-        if (!this.click"Save & Close") && !this.click("Ok")) {
-            if (this.click("Save") {
+        if (!this.click("Save & Close") && !this.click("Ok")) {
+            if (this.click("Save")) {
                 this.afterLoad(function() {
                     this.click("Close");
                     this.superclass.next.call(this);
