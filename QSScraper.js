@@ -31,27 +31,26 @@ QSScraper.prototype.add = function(object) {
 };
 
 /**
+ * Return this._data
+ */
+QSScraper.prototype.getData = function() {
+    return this._data;
+};
+
+/**
  * Exports file as a CSV file that gets downloaded
  *
  * @param filename      the filename, without extension (optional)
  */
-QSScraper.prototype.export = function(filename) {
+QSScraper.prototype.exportCSV = function(filename) {
     filename = filename || "Scraped QS data";
 
-    // this._updateProperties();
     var csv = new CSVWriter()
     if (this.exportKeys) {
         csv.writeHeader(this.exportKeys);
     }
     csv.writeRows(this._data);
     downloadFile(csv.getCSV(), filename + ".csv");
-};
-
-/**
- * Return this._data
- */
-QSScraper.prototype.getData = function() {
-    return this._data;
 };
 
 /**
@@ -63,6 +62,18 @@ QSScraper.prototype.getData = function() {
 QSScraper.prototype.setExportKeys = function(exportKeys) {
     this.exportKeys = exportKeys;
 }
+
+/** 
+ * Export a JSON file. Is a direct output of this.getData()
+ * 
+ * Initiates a file download with a .json extension.
+ */
+QSScraper.prototype.exportJSON = function(filename) {
+    filename = filename || "Scraped QS data";
+    var dataJSON = JSON.stringify(this._data, null, '    ');
+    downloadFile(dataJSON, filename + ".json");
+}
+
 
 /**
  * Makes a file then initiates a download

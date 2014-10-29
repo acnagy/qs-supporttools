@@ -81,7 +81,7 @@ QSIterator.prototype.debug = function() {
  * Run this.start(), but pause before second loop
  */
 QSIterator.prototype.runOnce = function() {
-    this.pauseAfterFirstLoop = true;
+    this.completeAfterFirstLoop = true;
     this.start();
 };
 
@@ -93,6 +93,7 @@ QSIterator.prototype.onComplete = function(callback) {
     this.onCompletionCallback = (this.parentIterator) ?
         callback.bind(this.parentIterator) :
         callback;
+    return this;
 };
 
 /**
@@ -101,6 +102,11 @@ QSIterator.prototype.onComplete = function(callback) {
  */
 QSIterator.prototype.next = function() {
     this.afterLoad(function() {
+        if (this.completeAfterFirstLoop) {
+            this.complete();
+            return;
+        }
+        
         if (this.nextElem()) {
             this._loop();
         } else {
@@ -149,10 +155,18 @@ QSIterator.prototype.click = function(buttonTitle, onlyButtons) {
     return false;
 };
 
-QSIterator.prototype.close = function() {
+QSIterator.prototype.closeDialog = function() {
+    this.click("Cancel") ||
+        this.click("Close") ||
+        this.clickAll("Back to list") ||
+        $(".ui-dialog-titlebar-close").click();
+}
+
+QSIterator.prototype.closeAll = function() {
     this.clickAll("Cancel"); // loading dialog
     this.clickAll("Close");
     this.clickAll("Back to list");
+    $(".ui-dialog-titlebar-close").click();
 };
 
 QSIterator.prototype.clickAll = function(buttonTitle) {
@@ -167,14 +181,14 @@ QSIterator.prototype.complete = function(message) {
     this.quit(message, false, false);
 };
 
-QSIterator.prototype.quit = function(reason, close, isError) {
+QSIterator.prototype.quit = function(reason, closeAll, isError) {
     isError = (typeof isError === "undefined") ? true : isError;
-    close = (typeof close === "undefined") ? true : close;
+    closeAll = (typeof closeAll === "undefined") ? true : closeAll;
 
     this.clearAfterNestedLoad();
     this.clearIntervals();
-    if (close) {
-        this.close();
+    if (closeAll) {
+        this.closeAll();
     }
     if (isError) {
         console.error(reason);
@@ -420,6 +434,13 @@ QSIterator.setQPVal = function(label, val) {
         }
     }
 };
+
+QSIterator.getQPVal = function(label) {
+    var qpInput = QSIterator.qpInputByLabel(label);
+    if (qpInput) {
+        return qpInput.val();
+    }
+}
 
 /**
  * Clicks the "delete" button for elements (such as criteria values)
