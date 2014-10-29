@@ -156,11 +156,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
             chrome.tabs.sendMessage(tabId, {"method": "chatBubbles"});
         }
     } else if (changeInfo.status === "complete") {
-        chrome.tabs.sendMessage(tabId, {"method": "getUrl"}, function(response) {
-            if (response && isNewZDTicketPage(response)) {
-                chrome.tabs.sendMessage(tabId, {"method": "chatBubbles"});
-            }
-        });
+        triggerChatBubbles(tabId);
     }
 });
 
@@ -170,10 +166,23 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
 function redirectToNewZD(tab) {
     chrome.tabs.update(tab.id, {url: newZdUrl(tab.url)});
+    triggerChatBubbles(tab.id);
 }
 
 function newZdUrl(oldUrl) {
     return oldUrl.replace("tickets", "agent/#/tickets");
+}
+
+// ============================
+// = Send ChatBubbles Message =
+// ============================
+
+function triggerChatBubbles(tabId) {
+    chrome.tabs.sendMessage(tabId, {"method": "getUrl"}, function(response) {
+        if (response && isNewZDTicketPage(response)) {
+            chrome.tabs.sendMessage(tabId, {"method": "chatBubbles"});
+        }
+    });
 }
 
 // ==============================================================
