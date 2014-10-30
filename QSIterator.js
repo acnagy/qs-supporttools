@@ -123,17 +123,22 @@ QSIterator.prototype.next = function() {
  *      "Save & Close", and then if there isn't a "Save & Close" button it'll
  *      try "Save".
  * @param onlyButtons   only click buttons. Defaults to true
+ * @param selector      additional selector for elements to try
  * @return boolean      whether anything that has a click event was found/clicked
  */
-QSIterator.prototype.click = function(buttonTitle, onlyButtons) {
+QSIterator.prototype.click = function(buttonTitle, onlyButtons, selector) { 
+    onlyButtons = onlyButtons || false;
+    selector = selector || "*";
+    
     var tryTitle = function(title) {
         // output like: button:contains(Save), .allButtons:contains(Save)
-        var selector = selectorBase + ":contains(" + title + ")" +
+        var buttonSelector = selectorBase + ":contains(" + title + ")" +
             ", .allbuttons" + ":contains(" + title + ")";
         if (title === "Close") {
-            selector += ":not(:contains(Save & Close))";
+            buttonSelector += ":not(:contains(Save & Close))";
         }
-        var buttons = $(selector);
+        var buttons = $(buttonSelector).filter(selector);
+        
         for (var i = buttons.length - 1; i >= 0; i--) {
             var button = buttons.eq(i);
             var data = button.data("events");
@@ -147,8 +152,7 @@ QSIterator.prototype.click = function(buttonTitle, onlyButtons) {
     var buttonTitles = Array.isArray(buttonTitle) ? buttonTitle : [buttonTitle];
     var selectorBase = (onlyButtons) ? "button" : "*";
     for (var i = 0; i < buttonTitles.length; i++) {
-        var clicked = tryTitle(buttonTitles[i]);
-        if (clicked) {
+        if (tryTitle(buttonTitles[i])) {
             return true;
         }
     }
@@ -249,7 +253,7 @@ QSIterator.prototype.afterLoad = function(callback, stopCondition) {
             callback();
             // callAfterNestedLoads();
         }
-    }, 10);
+    }, 50);
     this.intervals.push(load);
 };
 
