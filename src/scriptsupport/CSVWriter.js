@@ -28,7 +28,7 @@ function csvTest() {
  * @return          finished CSVWriter
  */
 CSVWriter.prototype.writeRows = function(rows) {
-    if (!(rows instanceof Array)) {
+    if(!(rows instanceof Array)) {
         rows = [rows];
     }
     rows.forEach(function(row) {
@@ -43,7 +43,7 @@ CSVWriter.prototype.writeRows = function(rows) {
  * @param keys      array of keys to write, in the order
  */
 CSVWriter.prototype.writeHeader = function(keys) {
-    if (!this._headerKeys.length) {
+    if(!this._headerKeys.length) {
         this._headerKeys = keys;
         keys.forEach(function(key) {
             this.addVal(key);
@@ -60,11 +60,11 @@ CSVWriter.prototype.writeHeader = function(keys) {
  * @param row       object to write. Must not have any keys not in the header
  */
 CSVWriter.prototype.writeRow = function(row) {
-    if (!this._headerKeys.length) {
+    if(!this._headerKeys.length) {
         this.writeHeader(Object.getOwnPropertyNames(row));
     }
     for (var propertyName in row) {
-        if (this._headerKeys.indexOf(propertyName) < 0) {
+        if(this._headerKeys.indexOf(propertyName) < 0) {
             console.warn("Writing row to CSV with key not in header row, so value will not be included. Key: " + propertyName + ", row:", row);
         }
     }
@@ -107,7 +107,7 @@ CSVWriter.prototype.addNewline = function() {
  */
 CSVWriter.prototype.stripLast = function(lastStr) {
     var len = this._contents.length;
-    if (this._contents.substring(len - lastStr.length) === lastStr) {
+    if(this._contents.substring(len - lastStr.length) === lastStr) {
         this._contents = this._contents.substring(0, len - lastStr.length);
     }
 }

@@ -65,7 +65,7 @@ function QSIterator(selector, loopFunc, useFirst, maxIters, increment) {
  */
 QSIterator.prototype.start = function() {
     this.startTime = Date.now();
-    if (this.nextElem()) {
+    if(this.nextElem()) {
         this._loop();
     } else {
         this.complete("Found no elements matching selector");
@@ -102,12 +102,12 @@ QSIterator.prototype.onComplete = function(callback) {
  */
 QSIterator.prototype.next = function() {
     this.afterLoad(function() {
-        if (this.completeAfterFirstLoop) {
+        if(this.completeAfterFirstLoop) {
             this.complete();
             return;
         }
         
-        if (this.nextElem()) {
+        if(this.nextElem()) {
             this._loop();
         } else {
             this.complete("Complete: no more elements matching selector");
@@ -134,7 +134,7 @@ QSIterator.prototype.click = function(buttonTitle, onlyButtons, selector) {
         // output like: button:contains(Save), .allButtons:contains(Save)
         var buttonSelector = selectorBase + ":contains(" + title + ")" +
             ", .allbuttons" + ":contains(" + title + ")";
-        if (title === "Close") {
+        if(title === "Close") {
             buttonSelector += ":not(:contains(Save & Close))";
         }
         var buttons = $(buttonSelector).filter(selector);
@@ -142,7 +142,7 @@ QSIterator.prototype.click = function(buttonTitle, onlyButtons, selector) {
         for (var i = buttons.length - 1; i >= 0; i--) {
             var button = buttons.eq(i);
             var data = button.data("events");
-            if (data !== undefined && data.click !== undefined) {
+            if(data !== undefined && data.click !== undefined) {
                 button.click();
                 return true;
             }
@@ -152,7 +152,7 @@ QSIterator.prototype.click = function(buttonTitle, onlyButtons, selector) {
     var buttonTitles = Array.isArray(buttonTitle) ? buttonTitle : [buttonTitle];
     var selectorBase = (onlyButtons) ? "button" : "*";
     for (var i = 0; i < buttonTitles.length; i++) {
-        if (tryTitle(buttonTitles[i])) {
+        if(tryTitle(buttonTitles[i])) {
             return true;
         }
     }
@@ -179,7 +179,7 @@ QSIterator.prototype.clickAll = function(buttonTitle) {
 
 QSIterator.prototype.complete = function(message) {
     this.clearAfterNestedLoad();
-    if (this.onCompletionCallback) {
+    if(this.onCompletionCallback) {
         this.onCompletionCallback();
     }
     this.quit(message, false, false);
@@ -191,15 +191,15 @@ QSIterator.prototype.quit = function(reason, closeAll, isError) {
 
     this.clearAfterNestedLoad();
     this.clearIntervals();
-    if (closeAll) {
+    if(closeAll) {
         this.closeAll();
     }
-    if (isError) {
+    if(isError) {
         console.error(reason);
     } else {
         console.log(reason);
     }
-    if (!this.isChild) {
+    if(!this.isChild) {
         document.title = this.originalDocumentTitle;
     }
 };
@@ -237,7 +237,7 @@ QSIterator.prototype.afterLoad = function(callback, stopCondition) {
     callback = callback.bind(this);
 
     var callAfterNestedLoads = function(){};
-    if (!callbackString.match("afterLoad") &&
+    if(!callbackString.match("afterLoad") &&
             this.afterNestedLoadsCallback) {
         callAfterNestedLoads = this.afterNestedLoadsCallback.bind(this);
     }
@@ -245,10 +245,10 @@ QSIterator.prototype.afterLoad = function(callback, stopCondition) {
     var quitFunc = this.quit.bind(this);
 
     var load = setInterval(function() {
-        if (qsIteratorEndNow) {
+        if(qsIteratorEndNow) {
             clearInterval(load);
             quitFunc("Cancelled via keyboard");
-        } else if (stopCondition.call()) {
+        } else if(stopCondition.call()) {
             clearInterval(load);
             callback();
             // callAfterNestedLoads();
@@ -277,7 +277,7 @@ QSIterator.prototype.withCallbackAfter = function(funcWithNesting, callbackAfter
     };
 
     funcWithNesting.call(this);
-    if (!this.afterLoadHasBeenCalled && this.afterNestedLoadsCallback) {
+    if(!this.afterLoadHasBeenCalled && this.afterNestedLoadsCallback) {
         this.afterNestedLoadsCallback();
     }
 };
@@ -322,12 +322,12 @@ QSIterator.prototype.afterChildIterator = function(callback, childIter) {
  * override to change what happens in each loop other than loopFunc
  */
 QSIterator.prototype._loop = function() {
-    if (this.pauseAfterFirstLoop && this.loopCount > 0) {
+    if(this.pauseAfterFirstLoop && this.loopCount > 0) {
         this.pause();
     } else {
         this.afterLoad(function() {
             this.loopCount ++;
-            if (this.makeUpdates) {
+            if(this.makeUpdates) {
                 this.statusUpdate();
             }
             this.loopFunc();
@@ -368,7 +368,7 @@ QSIterator.prototype.statusString = function() {
  */
 QSIterator.prototype.nextElem = function() {
     this.currentIndex ++;
-    if ((this.useFirst || this.currentIndex < this.elems.length) &&
+    if((this.useFirst || this.currentIndex < this.elems.length) &&
             (this.maxIters === undefined || this.currentIndex < this.maxIters)) {
         this.elems = $(this.selector);  // always refresh the elems
         this.elem = this.elems.eq(this.currentIndex);
@@ -401,9 +401,9 @@ QSIterator.qpInputByLabel = function(label, firstOnly, allowMultiple) {
         .next(".tableValue")
         .find("div:nth-child(1)")
         .find("input,select,textarea");
-    if (allowMultiple) {
+    if(allowMultiple) {
         return qpInput;
-    } else if (qpInput.length === 1 || firstOnly) {
+    } else if(qpInput.length === 1 || firstOnly) {
         return qpInput.first();
     } else {
         console.warn("Incorrect number of elems:", qpInput.length, "found for label: ", label, qpInput);
@@ -418,10 +418,10 @@ QSIterator.qpInputByLabel = function(label, firstOnly, allowMultiple) {
  */
 QSIterator.setQPVal = function(label, val) {
     var qpInput = QSIterator.qpInputByLabel(label);
-    if (qpInput) {
-        if (qpInput.is("select") && !qpInput.html().match(val)) {
+    if(qpInput) {
+        if(qpInput.is("select") && !qpInput.html().match(val)) {
             console.warn("Tried to set invalid val:", val, "on select from QP label:", label, qpInput);
-        } else if (qpInput.parents(".easySelectorWidget").length) {
+        } else if(qpInput.parents(".easySelectorWidget").length) {
             qpInput.parents(".item").find(".delete").click();
             qpInput.next(".resultsHolder")
                 .find("li:contains(" + val + ")")
@@ -433,7 +433,7 @@ QSIterator.setQPVal = function(label, val) {
                 .blur()
                 .change();
         }
-        if (qpInput.find(".hasDatepicker")) {
+        if(qpInput.find(".hasDatepicker")) {
             $("#ui-datepicker-div").hide()
         }
     }
@@ -441,7 +441,7 @@ QSIterator.setQPVal = function(label, val) {
 
 QSIterator.getQPVal = function(label) {
     var qpInput = QSIterator.qpInputByLabel(label);
-    if (qpInput) {
+    if(qpInput) {
         return qpInput.val();
     }
 }
@@ -453,7 +453,7 @@ QSIterator.getQPVal = function(label) {
  * @param elem  the elem to hover over
  */
 QSIterator.clickHoverDelete = function(elem) {
-    if (elem.length !== 1) {
+    if(elem.length !== 1) {
         console.warn("Wrong number of elems passed to clickHoverDelete", elem);
         return;
     }
@@ -465,7 +465,7 @@ QSIterator.clickHoverDelete = function(elem) {
  * TODO: merge this into a single function with afterLoad */
 function qsAfterLoad(callback, param) {
     var load = setInterval(function() {
-        if (!$("*[class^='load']:visible:not(.ribbonSelectorWidget *)").length) {
+        if(!$("*[class^='load']:visible:not(.ribbonSelectorWidget *)").length) {
             clearInterval(load);
             callback(param);
         }
@@ -476,7 +476,7 @@ function qsAfterLoad(callback, param) {
 /* loads on all pages for cancelling QSIterator loops */
 qsIteratorEndNow = false;
 $(window).keypress(function(e) {
-    if (e.which === 3) {
+    if(e.which === 3) {
         qsIteratorEndNow = true;
     }
 });

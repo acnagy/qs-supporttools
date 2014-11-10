@@ -32,13 +32,13 @@ QSZeusIterator.prototype.next = function() {
                                 will be called whether textfield is changed or not
  */
 QSZeusIterator.prototype.setZeusDefaultVal = function(textField, callback) {
-    if (this.checkQueryForChangeZeusAnswer(textField)) {
+    if(this.checkQueryForChangeZeusAnswer(textField)) {
         var defaultValueRegexp = /(Default|Current) value: (.*)/g;
         textField.mouseover();
         var newText = $(".tooltipWidget").text();
         $(".tooltipWidget").mouseover();
         match = defaultValueRegexp.exec(newText);
-        if (match) {
+        if(match) {
             newText = match[match.length - 1];
             return this.setZeusAnswer(textField, newText, callback);
         }
@@ -48,10 +48,10 @@ QSZeusIterator.prototype.setZeusDefaultVal = function(textField, callback) {
 };
 
 QSZeusIterator.prototype.checkQueryForChangeZeusAnswer = function(query) {
-    if (query.length !== 1) {
+    if(query.length !== 1) {
         this.pause("Incorrect # of values found for selector: " + query.selector + ". Is " + query.length + ", should be 1.");
         return false;
-    } else if (!query.is(":visible")){
+    } else if(!query.is(":visible")){
         this.pause("Trying to set val on invisible box: " + query.selector);
         return false;
     }
@@ -59,8 +59,8 @@ QSZeusIterator.prototype.checkQueryForChangeZeusAnswer = function(query) {
 }
 
 QSZeusIterator.prototype.setZeusAnswer = function(textField, newText, callback) {
-    if (this.checkQueryForChangeZeusAnswer(textField)) {
-        if (textField.text() === newText) {
+    if(this.checkQueryForChangeZeusAnswer(textField)) {
+        if(textField.text() === newText) {
             console.warn("Setting identical val: " + newText + " on text field", textField)
         }
         textField.click().text(newText);

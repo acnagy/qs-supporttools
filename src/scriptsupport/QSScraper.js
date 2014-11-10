@@ -46,7 +46,7 @@ QSScraper.prototype.exportCSV = function(filename) {
     filename = filename || "Scraped QS data";
 
     var csv = new CSVWriter()
-    if (this.exportKeys) {
+    if(this.exportKeys) {
         csv.writeHeader(this.exportKeys);
     }
     csv.writeRows(this._data);

@@ -2,7 +2,7 @@
     "background": {
         "persistent": true,
         "scripts": [
-            "background.js"
+            "src/background.js"
         ]
     },
     "commands": {
@@ -19,18 +19,25 @@
             "suggested_key": {
                 "default": "Ctrl+Shift+9"
             }
+        },
+        "injectScripts": {
+            "description": "Inject QS scripts on page",
+            "global": false,
+            "suggested_key": {
+                "default": "MacCtrl+Shift+H"
+            }
         }
     },
     "content_scripts": [
         {
             "js": [
-                "qs-supporttools.js",
-                "libraries/jquery.js",
-                "qs-supporttools-bootstrap.js",
-                "chatbubbles.js"
+                "src/qs-supporttools.js",
+                "lib/jquery.js",
+                "src/bootstrap.js",
+                "src/chatbubbles/chatbubbles.js"
             ],
             "css": [
-                "chatbubbles.css"
+                "src/chatbubbles/chatbubbles.css"
             ],
             "matches": [
                 "http://*/*",
@@ -58,15 +65,15 @@
     "short_name": "QS Tools",
     "version": "1.33.3",
     "web_accessible_resources": [
-        "injectScripts.js",
-        "QSIterator.js",
-    		"QSTableIterator.js",
-        "QSZeusIterator.js",
-        "QSGradebookIterator.js",
-        "QSScraper.js",
-        "QSImporter.js",
-        "CSVWriter.js",
-        "extend.js",
-        "libraries/json2csv.js"
+        "src/scriptsupport/injectScripts.js",
+        "src/scriptsupport/QSIterator.js",
+        "src/scriptsupport/QSTableIterator.js",
+        "src/scriptsupport/QSZeusIterator.js",
+        "src/scriptsupport/QSGradebookIterator.js",
+        "src/scriptsupport/QSScraper.js",
+        "src/scriptsupport/QSImporter.js",
+        "src/scriptsupport/CSVWriter.js",
+        "src/scriptsupport/extend.js",
+        "lib/json2csv.js"
     ]
 }

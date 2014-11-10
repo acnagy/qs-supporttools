@@ -1,6 +1,6 @@
 function extend(oldFunc, newFunc, callAfter) {
     callAfter = callAfter || true;
-    if (callAfter) {
+    if(callAfter) {
         return function() {
             var ret = oldFunc.apply(this, arguments);
             newFunc.apply(this, arguments);

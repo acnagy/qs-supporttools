@@ -31,9 +31,9 @@ QSGradebookIterator.prototype._loop = function() {
     // elem is a teacher in the teacher dropdown
     var startTeacher = "Marisa Alvarez"
 
-    if (this.elem.text().match(startTeacher)) {
+    if(this.elem.text().match(startTeacher)) {
         this.seenStart = true;
-    } else if (!this.seenStart) {
+    } else if(!this.seenStart) {
         console.log("next");
         this.next();
         return
@@ -48,7 +48,7 @@ QSGradebookIterator.prototype._loop = function() {
         var iter = new QSIterator(SEMESTER_OPTIONS_SELECTOR, function() {
             this.id = "semester";
             var semesterDropdown = $(SEMESTER_DROPDOWN_SELECTOR);
-            if (!this.elem.text().match("Spring 2014 3")) {
+            if(!this.elem.text().match("Spring 2014 3")) {
                 this.next();
                 return;
             }
