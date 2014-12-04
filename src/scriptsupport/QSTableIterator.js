@@ -16,12 +16,14 @@
  * optional params are the same, and selector is removed
  */
 
-function QSTableIterator(loopFunc, useFirst, maxIters, increment) {
+function QSTableIterator(loopFunc, useFirst, maxIters, increment, selector) {
+    selector = selector || QSTableIterator.SELECTOR;
+    
     ClassUtil.inherit(QSTableIterator, this, QSIterator);
-    this._super(this.SELECTOR, loopFunc, useFirst, maxIters, increment);
+    this._super(selector, loopFunc, useFirst, maxIters, increment);
 }
 
-QSTableIterator.prototype.SELECTOR = ".dataTableWidget:first .dttd:last-child:visible";
+QSTableIterator.SELECTOR = ".dataTableWidget:first .dttd:last-child:visible";
 
 QSTableIterator.prototype._loop = function() {
     this.elem.click();
