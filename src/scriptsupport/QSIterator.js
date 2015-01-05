@@ -19,6 +19,8 @@
  * use click, saveAndClose, etc, making it asynchronous
  * **loopFunc must call this.next() at the end to restart the loop**
  *
+ * if useFirst is true, the first result is focused every iteration.
+ *
  * @param selector      the jQuery selector to use to find the elements
  *                          **this is mandatory and very important**
  * @param loopFunc      the function that is called in each loop
@@ -367,8 +369,13 @@ QSIterator.prototype.statusString = function() {
  * @return boolean whether or not there was another elem to select
  */
 QSIterator.prototype.nextElem = function() {
-    this.currentIndex ++;
-    if((this.useFirst || this.currentIndex < this.elems.length) &&
+    if(this.useFirst) {
+        this.currentIndex = 0;
+    } else {
+        this.currentIndex ++;
+    }
+    
+    if((this.currentIndex < this.elems.length) &&
             (this.maxIters === undefined || this.currentIndex < this.maxIters)) {
         this.elems = $(this.selector);  // always refresh the elems
         this.elem = this.elems.eq(this.currentIndex);
