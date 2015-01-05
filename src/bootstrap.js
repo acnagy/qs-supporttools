@@ -32,7 +32,9 @@ function qsInjectScriptSupport(injectJQuery) {
 
 (function() {
     var url = document.URL;
-    if(url.match("quickschools.com") || url.match("smartschoolcentral.com")) {
+    if(url.match("quickschools.com") ||
+            url.match("smartschoolcentral.com") ||
+            url.match("localhost:8080/sms/js/local.html")) {
         qsInjectScriptSupport(false);
     }
 })();
