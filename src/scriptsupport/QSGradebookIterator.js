@@ -8,74 +8,94 @@
  * Extends QSIterator
  * iterates through each Gradebook for each teacher/semester
  *
+ * Loops through each teacher, semester, and section.
+ *
+ * For now, to filter on a given semester, teacher, or course, set
+ *     QSGradebookIterator.*_CONTAINS
+ *
  * @param loopFunc        the code to run in each entry after load
  */
 
-function QSGradebookIterator(loopFunc) {
+function QSGradebookIterator(loopFunc, argObj) {
     ClassUtil.inherit(QSGradebookIterator, this, QSIterator);
-    this._super(this.TEACHER_OPTIONS_SELECTOR, loopFunc);
+
+    this._super(QSGradebookIterator.teacherSelector(), loopFunc);
     this.hasSeenStart = false;
 }
 
-QSGradebookIterator.prototype.TEACHER_DROPDOWN_SELECTOR = ".mainRenderArea .dropDownWidget select:eq(0)";
-QSGradebookIterator.prototype.TEACHER_OPTIONS_SELECTOR = QSGradebookIterator.prototype.TEACHER_DROPDOWN_SELECTOR + " option";
+QSGradebookIterator.TEACHER_CONTAINS = "";
+QSGradebookIterator.SEMESTER_CONTAINS = "";
+QSGradebookIterator.COURSE_CONTAINS = "";
 
 QSGradebookIterator.prototype._loop = function() {
-    var SEMESTER_DROPDOWN_SELECTOR = ".mainRenderArea .dropDownWidget select:eq(1)";
-    var SEMESTER_OPTIONS_SELECTOR = SEMESTER_DROPDOWN_SELECTOR + " option";
-    var COURSE_DROPDOWN_SELECTOR = ".mainRenderArea .dropDownWidget select:eq(2)";
-    var COURSE_OPTIONS_SELECTOR = COURSE_DROPDOWN_SELECTOR +  " option";
-    var courseLoopFunc = this.loopFunc.bind(this);
     this.id = "teacher";
 
-    // elem is a teacher in the teacher dropdown
-    var startTeacher = "Marisa Alvarez"
-
-    if(this.elem.text().match(startTeacher)) {
-        this.seenStart = true;
-    } else if(!this.seenStart) {
-        console.log("next");
-        this.next();
-        return
-    }
-
-    var teacherDropdown = $(this.TEACHER_DROPDOWN_SELECTOR);
-    teacherDropdown.val(this.elem.text());
-    // new Notification("Starting: " + this.elem.text());
-    teacherDropdown.change();
+    var teacherDropdown = $(QSGradebookIterator.TEACHER_DROPDOWN_SELECTOR);
+    QSIterator.setDropdownVal(teacherDropdown, this.elem.val());
 
     this.afterLoad(function() {
-        var iter = new QSIterator(SEMESTER_OPTIONS_SELECTOR, function() {
-            this.id = "semester";
-            var semesterDropdown = $(SEMESTER_DROPDOWN_SELECTOR);
-            if(!this.elem.text().match("Spring 2014 3")) {
-                this.next();
-                return;
-            }
-
-            semesterDropdown.val(this.elem.text());
-            semesterDropdown.change();
-            this.afterLoad(function() {
-                var iter = new QSIterator(COURSE_OPTIONS_SELECTOR, function() {
-                    var courseDropdown = $(COURSE_DROPDOWN_SELECTOR);
-                    courseDropdown.val(this.elem.text());
-                    courseDropdown.change();
-                    this.afterLoad(function() {
-                        courseLoopFunc();
-                        this.afterLoad(function() {
-                            this.next();
-                        });
-                    });
-                    this.id = "course";
-                });
-                this.afterChildIterator(function() {
-                    this.next();
-                }, iter);
-            });
-        });
-        this.afterChildIterator(function() {
-            this.next();
-        }, iter);
+        var semesterIteratorForTeacher = QSGradebookIterator.semesterIterator(this.loopFunc);
+        this.afterChildIterator(this.next, semesterIteratorForTeacher);
     });
 };
 
+QSGradebookIterator.semesterIterator = function(courseLoopFunc) {
+    return new QSIterator(QSGradebookIterator.semesterSelector(), function() {
+        this.id = "semester";
+
+        var semesterDropdown = $(QSGradebookIterator.SEMESTER_DROPDOWN_SELECTOR);
+        QSIterator.setDropdownVal(semesterDropdown, this.elem.val());
+
+        this.afterLoad(function() {
+            var courseIteratorForSemester = QSGradebookIterator.courseIterator(courseLoopFunc);
+            this.afterChildIterator(this.next, courseIteratorForSemester);
+        });
+    });
+};
+
+QSGradebookIterator.courseIterator = function(courseLoopFunc) {
+    return new QSIterator(QSGradebookIterator.courseSelector(), function() {
+        this.id = "course";
+
+        var courseDropown = $(QSGradebookIterator.COURSE_DROPDOWN_SELECTOR);
+        QSIterator.setDropdownVal(courseDropown, this.elem.val());
+
+        this.afterLoad(courseLoopFunc);
+    });
+};
+
+QSGradebookIterator.teacherSelector = function() {
+    return QSGradebookIterator._optionsSelector(
+        QSGradebookIterator.TEACHER_OPTIONS_SELECTOR,
+        QSGradebookIterator.TEACHER_CONTAINS
+    );
+};
+
+QSGradebookIterator.semesterSelector = function() {
+    return QSGradebookIterator._optionsSelector(
+        QSGradebookIterator.SEMESTER_OPTIONS_SELECTOR,
+        QSGradebookIterator.SEMESTER_CONTAINS
+    );
+};
+
+QSGradebookIterator.courseSelector = function() {
+    return QSGradebookIterator._optionsSelector(
+        QSGradebookIterator.COURSE_OPTIONS_SELECTOR,
+        QSGradebookIterator.COURSE_CONTAINS
+    );
+};
+
+QSGradebookIterator._optionsSelector = function(base, filter) {
+    var contains = "";
+    if(filter) {
+        contains = ":contains(" + filter + ")"; 
+    }
+    return base + contains;
+};
+
+QSGradebookIterator.TEACHER_DROPDOWN_SELECTOR = ".mainRenderArea .dropDownWidget select:eq(0)";
+QSGradebookIterator.TEACHER_OPTIONS_SELECTOR = QSGradebookIterator.TEACHER_DROPDOWN_SELECTOR + " option";
+QSGradebookIterator.SEMESTER_DROPDOWN_SELECTOR = ".mainRenderArea .dropDownWidget select:eq(1)";
+QSGradebookIterator.SEMESTER_OPTIONS_SELECTOR = QSGradebookIterator.SEMESTER_DROPDOWN_SELECTOR + " option";
+QSGradebookIterator.COURSE_DROPDOWN_SELECTOR = ".mainRenderArea .dropDownWidget select:eq(2)";
+QSGradebookIterator.COURSE_OPTIONS_SELECTOR = QSGradebookIterator.COURSE_DROPDOWN_SELECTOR +  " option";

@@ -74,11 +74,6 @@ QSIterator.prototype.start = function() {
     }
 };
 
-QSIterator.prototype.debug = function() {
-    debugger;
-    this.start();
-};
-
 /**
  * Run this.start(), but pause before second loop
  */
@@ -150,7 +145,7 @@ QSIterator.prototype.click = function(buttonTitle, onlyButtons, selector) {
             }
         }
         return false;
-    }
+    };
     var buttonTitles = Array.isArray(buttonTitle) ? buttonTitle : [buttonTitle];
     var selectorBase = (onlyButtons) ? "button" : "*";
     for (var i = 0; i < buttonTitles.length; i++) {
@@ -162,11 +157,11 @@ QSIterator.prototype.click = function(buttonTitle, onlyButtons, selector) {
 };
 
 QSIterator.prototype.closeDialog = function() {
-    this.click("Cancel") ||
+    return this.click("Cancel") ||
         this.click("Close") ||
         this.clickAll("Back to list") ||
         $(".ui-dialog-titlebar-close").click();
-}
+};
 
 QSIterator.prototype.closeAll = function() {
     this.clickAll("Cancel"); // loading dialog
@@ -441,7 +436,7 @@ QSIterator.setQPVal = function(label, val) {
                 .change();
         }
         if(qpInput.find(".hasDatepicker")) {
-            $("#ui-datepicker-div").hide()
+            $("#ui-datepicker-div").hide();
         }
     }
 };
@@ -451,7 +446,7 @@ QSIterator.getQPVal = function(label) {
     if(qpInput) {
         return qpInput.val();
     }
-}
+};
 
 /**
  * Clicks the "delete" button for elements (such as criteria values)
@@ -466,6 +461,14 @@ QSIterator.clickHoverDelete = function(elem) {
     }
     elem.mouseover();
     $(".iconHolder:last").click();
+};
+
+/**
+ * Set the value on a DropDownWidget.
+ */
+QSIterator.setDropdownVal = function(dropdown, val) {
+    dropdown.val(val);
+    dropdown.change();
 };
 
 /* static version of afterLoad for external use
