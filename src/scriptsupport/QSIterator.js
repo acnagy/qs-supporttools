@@ -221,7 +221,7 @@ QSIterator.prototype.pause = function(message) {
 QSIterator.prototype.afterLoad = function(callback, stopCondition) {
     this.afterLoadHasBeenCalled = true;
 
-    var loadingSelector = "*[class^='load']:not(.ribbonSelectorWidget *):not(button>span.loading-section):visible:";
+    var loadingSelector = "*[class^='load']:not(.ribbonSelectorWidget *):not(button>span.loading-section):visible";
     // TODO: try using :hidden here?
     stopCondition = (stopCondition || function() {
         return $(loadingSelector).filter(function() {
