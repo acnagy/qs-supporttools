@@ -14,12 +14,15 @@
  *     QSGradebookIterator.*_CONTAINS
  *
  * @param loopFunc        the code to run in each entry after load
+ * @param startTeacher    (optional) the teacher to start on - good for crashes
  */
 
-function QSGradebookIterator(loopFunc, argObj) {
+function QSGradebookIterator(loopFunc, startTeacher) {
     ClassUtil.inherit(QSGradebookIterator, this, QSIterator);
 
     this._super(QSGradebookIterator.teacherSelector(), loopFunc);
+
+    this.startTeacher = startTeacher;
     this.hasSeenStart = false;
 }
 
@@ -29,6 +32,15 @@ QSGradebookIterator.COURSE_CONTAINS = "";
 
 QSGradebookIterator.prototype._loop = function() {
     this.id = "teacher";
+
+    if (this.elem.val().match(this.startTeacher)) {
+        this.hasSeenStart = true;
+    }
+
+    if(!this.hasSeenStart) {
+        this.next();
+        return;
+    }
 
     var teacherDropdown = $(QSGradebookIterator.TEACHER_DROPDOWN_SELECTOR);
     QSIterator.setDropdownVal(teacherDropdown, this.elem.val());
