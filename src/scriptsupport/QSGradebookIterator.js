@@ -46,12 +46,12 @@ QSGradebookIterator.prototype._loop = function() {
     QSIterator.setDropdownVal(teacherDropdown, this.elem.val());
 
     this.afterLoad(function() {
-        var semesterIteratorForTeacher = QSGradebookIterator.semesterIterator(this.loopFunc);
+        var semesterIteratorForTeacher = QSGradebookIterator.semesterIterator(this.loopFunc, this.elem.val());
         this.afterChildIterator(this.next, semesterIteratorForTeacher);
     });
 };
 
-QSGradebookIterator.semesterIterator = function(courseLoopFunc) {
+QSGradebookIterator.semesterIterator = function(courseLoopFunc, currentTeacher) {
     return new QSIterator(QSGradebookIterator.semesterSelector(), function() {
         this.id = "semester";
 
@@ -59,15 +59,17 @@ QSGradebookIterator.semesterIterator = function(courseLoopFunc) {
         QSIterator.setDropdownVal(semesterDropdown, this.elem.val());
 
         this.afterLoad(function() {
-            var courseIteratorForSemester = QSGradebookIterator.courseIterator(courseLoopFunc);
+            var courseIteratorForSemester = QSGradebookIterator.courseIterator(courseLoopFunc, currentTeacher, this.elem.val());
             this.afterChildIterator(this.next, courseIteratorForSemester);
         });
     });
 };
 
-QSGradebookIterator.courseIterator = function(courseLoopFunc) {
+QSGradebookIterator.courseIterator = function(courseLoopFunc, currentTeacher, currentSemester) {
     return new QSIterator(QSGradebookIterator.courseSelector(), function() {
         this.id = "course";
+        this.currentTeacher = currentTeacher;
+        this.currentSemester = currentSemester;
 
         var courseDropown = $(QSGradebookIterator.COURSE_DROPDOWN_SELECTOR);
         QSIterator.setDropdownVal(courseDropown, this.elem.val());
