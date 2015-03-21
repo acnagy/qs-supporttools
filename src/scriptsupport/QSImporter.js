@@ -5,6 +5,8 @@
  * something with each entry such as click a button, enter some fields, then
  * hit save. This can iterate over the default QSImporter data (this is the
  * default), or a supplied array.
+ *
+ * QSImporter.iterator supplies a this.item with the current item to import.
  */
 
 
@@ -18,7 +20,7 @@ QSImporter.iterator = function(loopFunc, importData) {
         this.item = this.items[this.currentIndex];
         loopFunc();
     };
-    this._super("*", newLoopFunc, true, this.items.length);
+    this._super("*", newLoopFunc, false, this.items.length);
 };
 
 QSImporter.iterator.test = function() {
