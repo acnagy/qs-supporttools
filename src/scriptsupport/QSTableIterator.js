@@ -33,8 +33,8 @@ QSTableIterator.prototype._loop = function() {
 QSTableIterator.prototype.next = function(save) {
     save = (save === true || save === false) ? save : true;
     
-    if(this.closeButtonText) {
-        this.click(this.closeButtonText);
+    if(this.closeButtonTextOptions) {
+        this.click(this.closeButtonTextOptions);
     } else if(save) {
         if(!this.click("Save & Close") && !this.click("Ok")) {
             if(this.click("Save")) {
@@ -53,10 +53,16 @@ QSTableIterator.prototype.next = function(save) {
 
 /**
  * Set the text of the close button
- * overrides the default "Save & Close"
+ * overrides the default "Save & Close".
+ *
+ * If you pass in an array, it'll try the options you give it in order.
  */
-QSTableIterator.prototype.setCloseButton = function(buttonText) {
-    this.closeButtonText = buttonText;
+QSTableIterator.prototype.setCloseButton = function(buttonTextOptions) {
+    if(!Array.isArray(buttonTextOptions)) {
+        buttonTextOptions = [buttonTextOptions];
+    }
+
+    this.closeButtonTextOptions = buttonTextOptions;
     return this;
 };
 
