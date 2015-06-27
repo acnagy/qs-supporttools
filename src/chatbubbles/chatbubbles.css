@@ -25,7 +25,7 @@
   position: relative;
   clear: both;
   
-  background: #95c2fd;
+  background: white;
   border: solid 1px rgba(0,0,0,0.5);
   border-radius: 5px; 
   margin-bottom: 5px;
@@ -45,26 +45,27 @@
 /* green bubble */
 .conversation .green {
   background: #78a300;
-  color: white;
-  border-color: #e7e7e7;
+  color: black;
+  border-color: black;
 }
 .conversation .green .sender {
-  color: #e7e7e7;
+  color: black;
 }
 
 /* yellow bubble */
 .conversation .yellow {
-  background: #fff6d9;
-  border-color: #efdaa3;
+  background: lightskyblue;
+  border-color: black;
 }
-
 .event:not(.is-public) .conversation .yellow {
-  background: #d5d5d5;
+  background: lightskyblue;
+  border: black solid thin;
 }
 
 .conversation .sender {
-  color: gray;
+  color: black;
   font-style: italic;
+  font-weight: bolder;
 }
 
 .chat .parsed-chat {
