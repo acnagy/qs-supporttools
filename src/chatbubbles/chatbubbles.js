@@ -21,12 +21,12 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 
 function findUnparsedChats() {
     return $(".comment:visible:not(.parsed-chat)").filter(function() {
-        return $(this).text().match(/\(\d\d:\d\d:\d\d [A|P]M\) /g);
+        return $(this).text().match(/\((\d\d.){3}[A|P]M\)/g);
     })
 }
 
 function convertChatToBubbles(chat) {
-    var chatBody = chat.children("p:not(:contains(was closed and merged into this request))");
+    var chatBody = chat.find("p:not(:contains(was closed and merged into this request))");
     var chatTexts = [];
     chatBody.each(function() {
         chatTexts.push($(this).text());
