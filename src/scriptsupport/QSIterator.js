@@ -250,7 +250,7 @@ QSIterator.prototype.afterLoad = function(callback, stopCondition) {
             callback();
             // callAfterNestedLoads();
         }
-    }, 50);
+    }, 200);
     this.intervals.push(load);
 };
 
@@ -469,6 +469,11 @@ QSIterator.clickHoverDelete = function(elem) {
 QSIterator.setDropdownVal = function(dropdown, val) {
     dropdown.val(val);
     dropdown.change();
+};
+
+QSIterator.setStylizedDropdownValue = function(stylizedDropDownWidget, val) {
+    stylizedDropDownWidget.find("table").trigger("click.dropDownActivate");
+    stylizedDropDownWidget.find(".easySelectorWidget").find("li:contains(" + val + ")").click();
 };
 
 /* static version of afterLoad for external use
